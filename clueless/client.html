@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clueless</title>
+</head>
+<body>
+    <h1>Game Client</h1>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send Message</button>
+
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        // connect to server
+        const socket = io.connect("https://dumb-erwi.onrender.com/");
+
+        // listen for server messages and display them
+        socket.on("server_message", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += "<p>" + data.response + "</p>";
+        });
+
+        // send message to server, which gets broadcasted to all clients
+        function sendMessage() {
+            const messageInput = document.getElementById("messageInput").value;
+            socket.emit("client_message", { message: messageInput });
+            document.getElementById("messageInput").value = "";
+        }
+    </script>
+</body>
+</html>
