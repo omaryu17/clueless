@@ -10,6 +10,7 @@ To develop locally, follow the steps below:
 4. Activate the virtual environment by running `source venv/bin/activate`
     - Windows users should use `venv/Scripts/activate` instead
 5. Install the necessary libraries by running `pip install -r requirements.txt`.
+6. Whenever you're done and want to turn off the virtual environment, run `deactivate` in your terminal.
 
 ## Testing the Server/Client
 The server is hosted on Render, but you can also test message sending locally if you have changes to the server you haven't pushed yet. To do so, follow the steps below:
