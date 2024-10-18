@@ -2,7 +2,7 @@ import eventlet
 eventlet.monkey_patch()
 
 from flask import Flask, jsonify
-from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -39,6 +39,8 @@ def handle_client_message(data):
     print(f"Message from client: {message}")
     emit('server_message', {'response': f"Broadcast: {message}"}, broadcast=True)
     print("emitted")
+
+# TODO: ADD MORE MESSAGE HANDLERS FOR SPECIFIC ACTIONS
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)

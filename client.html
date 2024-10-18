@@ -11,10 +11,12 @@
     <input type="text" id="messageInput" placeholder="Type a message...">
     <button onclick="sendMessage()">Send Message</button>
 
+    <!-- TODO: ADD MORE MESSAGES TO SEND TO SERVER WITH RELEVANT BUTTONS -->
+
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <script>
         // connect to server
-        const socket = io.connect("https://dumb-erwi.onrender.com/");
+        const socket = io.connect("https://clueless.onrender.com/");
 
         // listen for server messages and display them
         socket.on("server_message", function(data) {
