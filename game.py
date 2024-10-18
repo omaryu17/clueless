@@ -11,5 +11,5 @@ class Game():
         self.state = GameState(num_players)
         # TODO: FIGURE OUT WHAT OTHER INSTANCE VARIABLES WE NEED
 
-    # TODO: ADD OTHER METHODS
+    # TODO: ADD OTHER METHODS TO COMMUNICATE WITH SERVER
 
