@@ -58,7 +58,7 @@ def handle_client_ready(data):
 # Handle "Action" message from client
 @socketio.on("client_action")
 def handle_client_action(data):
-    with app.app_context:
+    with app.app_context():
         print(f"Player {request.sid} performed an action")
         emit("server_broadcast", {"response": f"Player {request.sid} performed an action!"}, broadcast=True)
 
