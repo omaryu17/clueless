@@ -28,7 +28,7 @@ def handle_connect():
     with app.app_context():
         print(f"Client {request.sid} connected")
         emit("server_broadcast", {"response": "Welcome to the game!"}, to=request.sid)
-        emit("server_broadcast", {"response": f"Player {request.sid} has joined."})
+        emit("server_broadcast", {"response": f"Player {request.sid} has joined."}, broadcast=True)
         print("emitted")
 
 # handle client disconnection
