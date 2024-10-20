@@ -27,8 +27,8 @@ def ping():
 def handle_connect():
     with app.app_context():
         print(f"Client {request.sid} connected")
-        emit("server_message", {"response": "Welcome to the game!"})
-        emit("server_message", {"response": f"Player {request.sid} has joined."})
+        emit("server_broadcast", {"response": "Welcome to the game!"})
+        emit("server_broadcast", {"response": f"Player {request.sid} has joined."})
         print("emitted")
 
 # handle client disconnection
@@ -36,7 +36,7 @@ def handle_connect():
 def handle_disconnect():
     with app.app_context():
         print(f"Client {request.sid} disconnected")
-        emit("server_message", {"response": f"Player {request.sid} has disconnected."})
+        emit("server_broadcast", {"response": f"Player {request.sid} has disconnected."})
         print("emitted")
 
 # handle message from client, then broadcast to all connected clients
