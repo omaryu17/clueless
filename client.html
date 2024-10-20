@@ -11,6 +11,9 @@
     <input type="text" id="messageInput" placeholder="Type a message...">
     <button onclick="sendMessage()">Send Message</button>
 
+    <button onclick="sendReadyMessage()">Send Ready</button><br><br>
+    <button onclick="sendActionMessage()">Send Action</button>
+
     <!-- TODO: ADD MORE MESSAGES TO SEND TO SERVER WITH RELEVANT BUTTONS -->
 
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
@@ -30,6 +33,15 @@
             socket.emit("client_message", { message: messageInput });
             document.getElementById("messageInput").value = "";
         }
+
+        function sendReadyMessage() {
+            socket.emit("client_ready", {message: "Player is ready"});
+        }
+
+        function sendActionMessage() {
+            socket.emit("client_action", {message: "Player pressed action button"})
+        }
+
     </script>
 </body>
 </html>
