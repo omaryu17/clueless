@@ -8,7 +8,7 @@ To develop locally, follow the steps below:
 3. Create a virtual environment by running `python3 -m venv venv`
     - Windows users should use `python -m venv venv` instead   
 4. Activate the virtual environment by running `source venv/bin/activate`
-    - Windows users should use `venv/Scripts/activate` instead
+    - Windows users should use `venv\Scripts\activate` instead
 5. Install the necessary libraries by running `pip install -r requirements.txt`.
 6. Whenever you're done and want to turn off the virtual environment, run `deactivate` in your terminal.
 
