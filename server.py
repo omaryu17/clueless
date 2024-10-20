@@ -27,7 +27,7 @@ def ping():
 def handle_connect():
     with app.app_context():
         print(f"Client {request.sid} connected")
-        emit("server_message", {"response": "Welcome to the game!"}, to=request.sid)
+        emit("server_message", {"response": "Welcome to the game!"})
         emit("server_message", {"response": f"Player {request.sid} has joined."})
         print("emitted")
 
