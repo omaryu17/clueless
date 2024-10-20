@@ -48,6 +48,20 @@ def handle_client_message(data):
         emit("server_broadcast", {"response": f"Server Broadcast - Player {request.sid} sent: {message}"}, broadcast=True)
         print("emitted")
 
+# handle ready message from client
+@socketio.on("client_ready")
+def handle_client_ready(data):
+    with app.app_context():
+        print(f"Player {request.sid} is ready")
+        emit("server_broadcast", {"response": f"Player {request.sid} is ready!"}, broadcast=True)
+
+# Handle "Action" message from client
+@socketio.on("client_action")
+def handle_client_action(data):
+    with app.app_context:
+        print(f"Player {request.sid} performed an action")
+        emit("server_broadcast", {"response": f"Player {request.sid} performed an action!"}, broadcast=True)
+
 # TODO: ADD MORE MESSAGE HANDLERS FOR SPECIFIC ACTIONS
 
 
