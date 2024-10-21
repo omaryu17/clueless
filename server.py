@@ -4,8 +4,7 @@
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
-from models import db, GameModel
+from models import db
 from game import Game
 
 app = Flask(__name__)
@@ -18,9 +17,10 @@ db.init_app(app)
 
 # later replace * with actual client url once it"s deployed
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", ping_interval=5, ping_timeout=10)
 
 with app.app_context():
+    db.drop_all()
     db.create_all()
 
 # HTTP route for cron job to keep server alive
