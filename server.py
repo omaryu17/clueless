@@ -74,7 +74,7 @@ def handle_client_action(data):
 @socketio.on("move_to_hallway")
 def move_to_hallway(data):
     hallway = int(data.get("hallway", -1))  # Get hallway number from client
-    game_id = int(data.get("game", -1))
+    game_id = int(data.get("game_id", -1))
 
     # Load game and update the hallway for the current player
     player_id = request.sid  
@@ -85,13 +85,13 @@ def move_to_hallway(data):
     print(f"Player {player_id} moved to hallway {hallway}")
 
     # Broadcast the action
-    emit("server_message", {"response": f"Player {player_id} moved to hallway {hallway}"}, broadcast=True)
+    emit("server_broadcast", {"response": f"Player {player_id} moved to hallway {hallway}"}, broadcast=True)
 
 # Get the current hallway of the player
 @socketio.on("get_current_hallway")
 def get_current_hallway(data):
     player_id = request.sid
-    game_id = int(data.get("game", -1))
+    game_id = int(data.get("game_id", -1))
 
     # Load game from the database
     game = Game(num_players=0, status='active')
@@ -102,7 +102,7 @@ def get_current_hallway(data):
     print(f"Player {player_id} is in hallway {current_hallway}")
 
     # Send the current hallway back to the client
-    emit("server_message", {"response": f"Player {player_id} is in hallway {current_hallway}"}, to=request.sid)
+    emit("server_broadcast", {"response": f"Player {player_id} is in hallway {current_hallway}"}, to=request.sid)
 
 
 # Event to create a game and save it to the database
