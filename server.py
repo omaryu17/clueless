@@ -1,5 +1,5 @@
-import eventlet
-eventlet.monkey_patch()
+# import eventlet
+# eventlet.monkey_patch()
 
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
@@ -18,7 +18,7 @@ db.init_app(app)
 
 # later replace * with actual client url once it"s deployed
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 with app.app_context():
     db.create_all()

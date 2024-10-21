@@ -9,6 +9,8 @@ Flask==3.0.3
 Flask-Cors==5.0.0
 Flask-SocketIO==5.4.1
 Flask-SQLAlchemy==3.1.1
+gevent==24.10.3
+gevent-websocket==0.10.1
 greenlet==3.1.1
 gunicorn==23.0.0
 h11==0.14.0
@@ -26,3 +28,5 @@ typing_extensions==4.12.2
 urllib3==2.2.3
 Werkzeug==3.0.4
 wsproto==1.2.0
+zope.event==5.0
+zope.interface==7.1.0
