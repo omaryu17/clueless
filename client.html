@@ -87,6 +87,12 @@
             messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
         });
 
+        // Listen for game loaded broadcast
+        socket.on('game_loaded_error', function(data) {
+            const messageDiv = document.getElementById('messages');
+            messageDiv.innerHTML += `<p>Game with ID= ${data.id} could not be loaded</p>`;
+        });
+
         // Send create_game event to server
         function createGame() {
             const numPlayers = document.getElementById('numPlayersInput').value;

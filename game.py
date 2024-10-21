@@ -50,7 +50,7 @@ class Game():
             return False
 
 
-    # TODO: ADD OTHER METHODS TO COMMUNICATE WITH SERVER
+    # TODO: ADD OTHER METHODS
 
 
     # movement, accusation, suggestion, disprove
