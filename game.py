@@ -13,6 +13,20 @@ class Game():
         # TODO: FIGURE OUT WHAT OTHER INSTANCE VARIABLES WE NEED
         self.count += 1
 
+    def move_player_to_hallway(self, player_id, hallway):
+        # Update the player's hallway in the game state
+        self.state.locations[player_id]["hallway"] = hallway
+
+        # Save the updated state to the database
+        self.save_to_db()
+
+    def get_player_hallway(self, player_id):
+        # Return the current hallway of the player
+        if player_id in self.state.locations:
+            return self.state.locations[player_id].get("hallway", "unknown")
+        else:
+            return "unknown"
+
     def save_to_db(self):
         model = GameModel(self.num_players, self.status, self.state.to_json())
         db.session.add(model)

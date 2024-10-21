@@ -16,14 +16,23 @@
 
     <!-- Input for Loading a Game -->
     <input type="number" id="gameIdInput" placeholder="Game ID">
-    <button onclick="getGame()">Load Game</button>
+    <button onclick="getGame()">Load Game</button><br><br>
 
 
     <input type="text" id="messageInput" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send Message</button>
+    <button onclick="sendMessage()">Send Message</button><br><br>
 
     <button onclick="sendReadyMessage()">Send Ready</button><br><br>
-    <button onclick="sendActionMessage()">Send Action</button>
+    <button onclick="sendActionMessage()">Send Action</button><br><br>
+
+    <input type="number" id="hallwayInput" placeholder="Enter hallway number">
+    <input type="number" id="hallwaygame" placeholder="Enter game">
+    <button onclick="moveToHallway()">Move to Hallway</button><br><br>
+
+    <!-- Button to Retrieve Current Hallway -->
+    <input type="number" id="gethallwaygame" placeholder="Enter game">
+    <button onclick="getCurrentHallway()">Get Current Hallway</button><br><br>
+
 
     <!-- TODO: ADD MORE MESSAGES TO SEND TO SERVER WITH RELEVANT BUTTONS -->
 
@@ -45,6 +54,19 @@
             document.getElementById("messageInput").value = "";
         }
 
+        // Send move to hallway event
+        function moveToHallway() {
+            const hallway = document.getElementById('hallwayInput').value;
+            const game = document.getElementyByID("hallwaygame").value;
+            socket.emit('move_to_hallway', { hallway: hallway, game_id : game});
+        }
+
+        // Request current hallway from the server
+        function getCurrentHallway() {
+            const game = document.getElementyByID("gethallwaygame").value;
+            socket.emit('get_current_hallway', {game_id : game});
+        }
+
         function sendReadyMessage() {
             socket.emit("client_ready", {message: "Player is ready"});
         }
@@ -56,13 +78,13 @@
         // Listen for game creation broadcast
         socket.on('game_created', function(data) {
             const messageDiv = document.getElementById('messages');
-            messageDiv.innerHTML += `<p>Game Created: ID=${data.id}, Num Players=${data.num_players}, Status=${data.status}</p>`;
+            messageDiv.innerHTML += `<p>Game Created: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
         });
 
         // Listen for game loaded broadcast
         socket.on('game_loaded', function(data) {
             const messageDiv = document.getElementById('messages');
-            messageDiv.innerHTML += `<p>Game Loaded: ID=${data.id}, Num Players=${data.num_players}, Status=${data.status}</p>`;
+            messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
         });
 
         // Send create_game event to server
@@ -70,12 +92,15 @@
             const numPlayers = document.getElementById('numPlayersInput').value;
             const status = document.getElementById('statusInput').value;
             socket.emit('create_game', { num_players: numPlayers, status: status });
+            document.getElementById("numPlayersInput").value = "";
+            document.getElementById("statusInput").value = "";
         }
 
         // Send get_game event to server
         function getGame() {
             const gameId = document.getElementById('gameIdInput').value;
             socket.emit('get_game', { game_id: gameId });
+            document.getElementById("gameIdInput").value = "";
         }
 
     </script>
