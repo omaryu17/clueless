@@ -8,6 +8,17 @@
 <body>
     <h1>Game Client</h1>
     <div id="messages"></div>
+
+    <!-- Input for Creating a Game -->
+    <input type="number" id="numPlayersInput" placeholder="Number of Players">
+    <input type="text" id="statusInput" placeholder="Game Status">
+    <button onclick="createGame()">Create Game</button><br><br>
+
+    <!-- Input for Loading a Game -->
+    <input type="number" id="gameIdInput" placeholder="Game ID">
+    <button onclick="getGame()">Load Game</button>
+
+
     <input type="text" id="messageInput" placeholder="Type a message...">
     <button onclick="sendMessage()">Send Message</button>
 
@@ -40,6 +51,31 @@
 
         function sendActionMessage() {
             socket.emit("client_action", {message: "Player pressed action button"})
+        }
+
+        // Listen for game creation broadcast
+        socket.on('game_created', function(data) {
+            const messageDiv = document.getElementById('messages');
+            messageDiv.innerHTML += `<p>Game Created: ID=${data.id}, Num Players=${data.num_players}, Status=${data.status}</p>`;
+        });
+
+        // Listen for game loaded broadcast
+        socket.on('game_loaded', function(data) {
+            const messageDiv = document.getElementById('messages');
+            messageDiv.innerHTML += `<p>Game Loaded: ID=${data.id}, Num Players=${data.num_players}, Status=${data.status}</p>`;
+        });
+
+        // Send create_game event to server
+        function createGame() {
+            const numPlayers = document.getElementById('numPlayersInput').value;
+            const status = document.getElementById('statusInput').value;
+            socket.emit('create_game', { num_players: numPlayers, status: status });
+        }
+
+        // Send get_game event to server
+        function getGame() {
+            const gameId = document.getElementById('gameIdInput').value;
+            socket.emit('get_game', { game_id: gameId });
         }
 
     </script>
