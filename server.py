@@ -149,8 +149,8 @@ def get_game(data):
             }, broadcast=True)
         else:
             # Print the game's info
-            print(f"Game with ID={loaded_game.id} could not be loaded")
-            emit("game_loaded_error", {"id": loaded_game.id}, broadcast=True)
+            print(f"Game with ID={game_id} could not be loaded")
+            emit("game_loaded_error", {"id": game_id}, broadcast=True)
 
             # # Emit the loaded game info to all connected clients
             # emit("game_loaded", {
