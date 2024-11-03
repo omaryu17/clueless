@@ -1,0 +1,86 @@
+[
+    {
+        "type": "suspect",
+        "name": "Miss Scarlett"
+    },
+    {
+        "type": "suspect",
+        "name": "Colonel Mustard"
+    },
+    {
+        "type": "suspect",
+        "name": "Mrs. White"
+    },
+    {
+        "type": "suspect",
+        "name": "Reverend Green"
+    },
+    {
+        "type": "suspect",
+        "name": "Mrs. Peacock"
+    },
+    {
+        "type": "suspect",
+        "name": "Professor Plum"
+    },
+    {
+        "type": "weapon",
+        "name": "Candlestick"
+    },
+    {
+        "type": "weapon",
+        "name": "Dagger"
+    },
+    {
+        "type": "weapon",
+        "name": "Lead piping"
+    },
+    {
+        "type": "weapon",
+        "name": "Revolver"
+    },
+    {
+        "type": "weapon",
+        "name": "Rope"
+    },
+    {
+        "type": "weapon",
+        "name": "Spanner"
+    },
+    {
+        "type": "room",
+        "name": "hall"
+    },
+    {
+        "type": "room",
+        "name": "lounge"
+    },
+    {
+        "type": "room",
+        "name": "dining room"
+    },
+    {
+        "type": "room",
+        "name": "kitchen"
+    },
+    {
+        "type": "room",
+        "name": "ballroom"
+    },
+    {
+        "type": "room",
+        "name": "conservatory"
+    },
+    {
+        "type": "room",
+        "name": "billiard room"
+    },
+    {
+        "type": "room",
+        "name": "library"
+    },
+    {
+        "type": "room",
+        "name": "study"
+    }
+]
