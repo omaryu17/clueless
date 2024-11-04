@@ -1,7 +1,7 @@
 [
     {
         "type": "suspect",
-        "name": "Miss Scarlett"
+        "name": "Miss Scarlet"
     },
     {
         "type": "suspect",
@@ -13,7 +13,7 @@
     },
     {
         "type": "suspect",
-        "name": "Reverend Green"
+        "name": "Mr. Green"
     },
     {
         "type": "suspect",
@@ -29,11 +29,11 @@
     },
     {
         "type": "weapon",
-        "name": "Dagger"
+        "name": "Knife"
     },
     {
         "type": "weapon",
-        "name": "Lead piping"
+        "name": "Lead pipe"
     },
     {
         "type": "weapon",
@@ -45,42 +45,42 @@
     },
     {
         "type": "weapon",
-        "name": "Spanner"
+        "name": "Wrench"
     },
     {
         "type": "room",
-        "name": "hall"
+        "name": "Hall"
     },
     {
         "type": "room",
-        "name": "lounge"
+        "name": "Lounge"
     },
     {
         "type": "room",
-        "name": "dining room"
+        "name": "Dining Room"
     },
     {
         "type": "room",
-        "name": "kitchen"
+        "name": "Kitchen"
     },
     {
         "type": "room",
-        "name": "ballroom"
+        "name": "Ballroom"
     },
     {
         "type": "room",
-        "name": "conservatory"
+        "name": "Conservatory"
     },
     {
         "type": "room",
-        "name": "billiard room"
+        "name": "Billiard Room"
     },
     {
         "type": "room",
-        "name": "library"
+        "name": "Library"
     },
     {
         "type": "room",
-        "name": "study"
+        "name": "Study"
     }
 ]

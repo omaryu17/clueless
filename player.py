@@ -13,6 +13,9 @@ class Player():
     def add_card(self, card):
         """Add Card to hand"""
         self.hand.append(card)
+
+    def get_character_name(self):
+        return self.clue_character_name
     
     def move_to(self, location):
         self.current_position = location
@@ -28,5 +31,8 @@ class Player():
     
     def set_inactive(self):
         self.status = False
+    
+    def __repr__(self):
+        return f"Player(id={self.player_id}, name='{self.player_name}', character={self.clue_character_name})"
     
     # def make_suggestion()
