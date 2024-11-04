@@ -28,7 +28,6 @@ class Deck():
             if card.get_info()[0] == card_type:
                 type_cards.append(card)
         return type_cards
-    
 
     def _create_solution(self):
         """Select one weapon, room, and suspect to be game solution"""
@@ -44,6 +43,7 @@ class Deck():
         return self.solution
 
     def deal(self, player_list):
+        """Create solution and deal remaining cards to Players"""
         self._shuffle()
         self._create_solution()
 

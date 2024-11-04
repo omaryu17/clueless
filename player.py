@@ -13,3 +13,20 @@ class Player():
     def add_card(self, card):
         """Add Card to hand"""
         self.hand.append(card)
+    
+    def move_to(self, location):
+        self.current_position = location
+
+    def get_position(self):
+        return self.current_position
+    
+    def get_status(self):
+        return self.status
+    
+    def is_turn(self):
+        return self.turn
+    
+    def set_inactive(self):
+        self.status = False
+    
+    # def make_suggestion()
