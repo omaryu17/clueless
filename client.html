@@ -90,10 +90,19 @@
             <button onclick="sendReadyMessage()">Send Ready</button>
             <button onclick="sendActionMessage()">Send Action</button>
 
+    <!-- <input type="number" id="hallwayInput" placeholder="Enter hallway number">
+    <input type="number" id="hallwaygame" placeholder="Enter game">
+    <button onclick="moveToHallway()">Move to Hallway</button><br><br> -->
             <input type="number" id="hallwayInput" placeholder="Enter hallway number">
             <input type="number" id="hallwaygame" placeholder="Enter game">
             <button onclick="moveToHallway()">Move to Hallway</button>
 
+    <!-- Button to Retrieve Current Hallway -->
+    <!-- <input type="number" id="gethallwaygame" placeholder="Enter game">
+    <button onclick="getCurrentHallway()">Get Current Hallway</button><br><br> -->
+
+
+    <!-- TODO: ADD MORE MESSAGES TO SEND TO SERVER WITH RELEVANT BUTTONS -->
             <input type="number" id="gethallwaygame" placeholder="Enter game">
             <button onclick="getCurrentHallway()">Get Current Hallway</button>
         </div>
@@ -132,6 +141,11 @@
         //     const game = document.getElementyByID("gethallwaygame").value;
         //     socket.emit('get_current_hallway', {game_id : game});
         // }
+        // // Request current hallway from the server
+        // function getCurrentHallway() {
+        //     const game = document.getElementyByID("gethallwaygame").value;
+        //     socket.emit('get_current_hallway', {game_id : game});
+        // }
 
         function sendReadyMessage() {
             socket.emit("client_ready", {message: "Player is ready"});
@@ -151,6 +165,12 @@
         socket.on('game_loaded', function(data) {
             const messageDiv = document.getElementById('messages');
             messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+        });
+
+        // Listen for game loaded broadcast
+        socket.on('game_loaded_error', function(data) {
+            const messageDiv = document.getElementById('messages');
+            messageDiv.innerHTML += `<p>Game with ID= ${data.id} could not be loaded</p>`;
         });
 
         // Listen for game loaded broadcast
