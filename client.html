@@ -1,45 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clueless</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Clueless</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                font-family: "Kanit", sans-serif;
+                font-weight: 400;
+                font-style: normal;
+                color: white;
+                background-color: #202D1B;
+            }
+            .container {
+                display: flex;
+                height: 100%;
+            }
+            .input-section {
+                width: 30%;
+                padding: 20px;
+                background-color: #472318;
+                overflow-y: auto;
+            }
+            .board-section {
+                width: 70%;
+                height: 100%;
+            }
+            input {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                box-sizing: border-box;
+                background-color: white; 
+                font-family: "Kanit", sans-serif;
+                font-weight: 400;
+                font-style: normal;
+            }
+            button {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                box-sizing: border-box;
+                background-color: #C26571; /* btn color */
+                color: white; /* txt col*/
+                border: none; 
+                cursor: pointer; /* cursor to pointer on hover */
+                font-family: "Kanit", sans-serif;
+                font-weight: 400;
+                font-style: normal;
+            }
+            button:hover {
+                opacity: 0.8; 
+                background-color: #ffb3bc; 
+                color: black;
+            }
+            #messages {
+                height: 200px;
+                overflow-y: auto;
+                border: 1px solid #ccc;
+                padding: 10px;
+                margin-bottom: 10px;
+                background-color: antiquewhite;
+                color: #5c3030;
+            }
+    </style>
 </head>
 <body>
-    <h1>Game Client</h1>
-    <div id="messages"></div>
+    <div class="container">
+        <div class="input-section">
+            <h1>Game Client</h1>
+            <div id="messages"></div>
 
-    <!-- Input for Creating a Game -->
-    <input type="number" id="numPlayersInput" placeholder="Number of Players">
-    <input type="text" id="statusInput" placeholder="Game Status">
-    <button onclick="createGame()">Create Game</button><br><br>
+            <input type="number" id="numPlayersInput" placeholder="Number of Players">
+            <input type="text" id="statusInput" placeholder="Game Status">
+            <button onclick="createGame()">Create Game</button>
 
-    <!-- Input for Loading a Game -->
-    <input type="number" id="gameIdInput" placeholder="Game ID">
-    <button onclick="getGame()">Load Game</button><br><br>
+            <input type="number" id="gameIdInput" placeholder="Game ID">
+            <button onclick="getGame()">Load Game</button>
 
+            <input type="text" id="messageInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send Message</button>
 
-    <input type="text" id="messageInput" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send Message</button><br><br>
+            <button onclick="sendReadyMessage()">Send Ready</button>
+            <button onclick="sendActionMessage()">Send Action</button>
 
-    <button onclick="sendReadyMessage()">Send Ready</button><br><br>
-    <button onclick="sendActionMessage()">Send Action</button><br><br>
+            <input type="number" id="hallwayInput" placeholder="Enter hallway number">
+            <input type="number" id="hallwaygame" placeholder="Enter game">
+            <button onclick="moveToHallway()">Move to Hallway</button>
 
-    <input type="number" id="hallwayInput" placeholder="Enter hallway number">
-    <input type="number" id="hallwaygame" placeholder="Enter game">
-    <button onclick="moveToHallway()">Move to Hallway</button><br><br>
-
-    <!-- Button to Retrieve Current Hallway -->
-    <input type="number" id="gethallwaygame" placeholder="Enter game">
-    <button onclick="getCurrentHallway()">Get Current Hallway</button><br><br>
-
-
-    <!-- TODO: ADD MORE MESSAGES TO SEND TO SERVER WITH RELEVANT BUTTONS -->
+            <input type="number" id="gethallwaygame" placeholder="Enter game">
+            <button onclick="getCurrentHallway()">Get Current Hallway</button>
+        </div>
+        <div class="board-section">
+            <iframe id="gameBoard" src="board.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
 
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <script>
         // connect to server
-        const socket = io.connect("https://clueless.onrender.com/");
+        const socket = io.connect("http://127.0.0.1:5000");
 
         // listen for server messages and display them
         socket.on("server_broadcast", function(data) {
@@ -54,18 +120,18 @@
             document.getElementById("messageInput").value = "";
         }
 
-        // Send move to hallway event
-        function moveToHallway() {
-            const hallway = document.getElementById('hallwayInput').value;
-            const game = document.getElementyByID("hallwaygame").value;
-            socket.emit('move_to_hallway', { hallway: hallway, game_id : game});
-        }
+        // // Send move to hallway event
+        // function moveToHallway() {
+        //     const hallway = document.getElementById('hallwayInput').value;
+        //     const game = document.getElementyByID("hallwaygame").value;
+        //     socket.emit('move_to_hallway', { hallway: hallway, game_id : game});
+        // }
 
-        // Request current hallway from the server
-        function getCurrentHallway() {
-            const game = document.getElementyByID("gethallwaygame").value;
-            socket.emit('get_current_hallway', {game_id : game});
-        }
+        // // Request current hallway from the server
+        // function getCurrentHallway() {
+        //     const game = document.getElementyByID("gethallwaygame").value;
+        //     socket.emit('get_current_hallway', {game_id : game});
+        // }
 
         function sendReadyMessage() {
             socket.emit("client_ready", {message: "Player is ready"});
@@ -85,6 +151,12 @@
         socket.on('game_loaded', function(data) {
             const messageDiv = document.getElementById('messages');
             messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+        });
+
+        // Listen for game loaded broadcast
+        socket.on('game_loaded_error', function(data) {
+            const messageDiv = document.getElementById('messages');
+            messageDiv.innerHTML += `<p>Game with ID= ${data.id} could not be loaded</p>`;
         });
 
         // Send create_game event to server
