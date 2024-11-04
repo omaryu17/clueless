@@ -8,7 +8,7 @@ class Deck():
     def __init__(self):
         self.card_list = []
         self.solution = []
-        self.load_deck()
+        self._load_deck()
 
     def _load_deck(self):
         # reading from json, but can update to db or something later
@@ -19,10 +19,10 @@ class Deck():
             self.card_list.append(Card(card_type=card['type'], name=card['name']))
 
     def _shuffle(self):
-        self.card_list = random.shuffle(self.card_list)
+        random.shuffle(self.card_list)
 
     def get_type_cards(self, card_type):
-        # get all weapons, rooms, or suspects
+        """Get all weapons, rooms, or suspects"""
         type_cards = []
         for card in self.card_list:
             if card.get_info()[0] == card_type:
@@ -31,20 +31,21 @@ class Deck():
     
 
     def _create_solution(self):
+        """Select one weapon, room, and suspect to be game solution"""
         card_types = ['weapon', 'suspect', 'room']
 
         self.solution = []
         # get 1 weapon, suspect, and room
         for card_type in card_types:
-            cards = self.get_type_cards(card_types)
+            cards = self.get_type_cards(card_type)
             self.solution.append(random.choice(cards))
     
     def get_solution(self):
-        return self.solution()
+        return self.solution
 
     def deal(self, player_list):
-        self.shuffle()
-        self.create_solution()
+        self._shuffle()
+        self._create_solution()
 
         cards_to_deal = [card for card in self.card_list if card not in self.solution]
 
