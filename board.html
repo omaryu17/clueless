@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+        
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clue-Less Game Board</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Kanit", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+        .board {
+            /* display: grid;
+            grid-template-columns: 1fr 0.5fr 1fr 0.5fr 1fr;
+            grid-template-rows: 1fr 0.5fr 1fr 0.5fr 1fr;
+            gap: 0;
+            aspect-ratio: 1 / 1;
+            max-width: 100%;
+            max-height: 100%; */
+            display: grid;
+            grid-template-columns: 0.8fr 0.5fr 0.8fr 0.5fr 0.8fr;
+            grid-template-rows: 0.8fr 0.5fr 0.8fr 0.5fr 0.8fr;
+            gap: 2px;
+            aspect-ratio: 1 / 1;
+            width: 80vmin;
+            height: 80vmin;
+        }
+        .room {
+            background-color: #C8A556;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 2.8vw;
+            text-align: center;
+            border: 2px solid #ececec; /* Small outline around each room */
+        }
+        .hallway {
+            background-color: #aaafad; /* Hallway color */
+            /* No border for hallways */
+        }
+        .hallway-horizontal {
+            height: 30%;
+            align-self: center;
+        }
+        .hallway-vertical {
+            /* grid-row: span 1; */
+            width: 30%;
+            justify-self: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="board">
+        <div class="room">Study</div>
+        <div class="hallway hallway-horizontal"></div>
+        <div class="room">Hall</div>
+        <div class="hallway hallway-horizontal"></div>
+        <div class="room">Lounge</div>
+        
+        <div class="hallway hallway-vertical"></div>
+        <div class="empty"></div>
+        <div class="hallway hallway-vertical"></div>
+        <div class="empty"></div>
+        <div class="hallway hallway-vertical"></div>
+        
+        <div class="room">Library</div>
+        <div class="hallway hallway-horizontal"></div>
+        <div class="room">Billiard Room</div>
+        <div class="hallway hallway-horizontal"></div>
+        <div class="room">Dining Room</div>
+        
+        <div class="hallway hallway-vertical"></div>
+        <div class="empty"></div>
+        <div class="hallway hallway-vertical"></div>
+        <div class="empty"></div>
+        <div class="hallway hallway-vertical"></div>
+        
+        <div class="room">Conservatory</div>
+        <div class="hallway hallway-horizontal"></div>
+        <div class="room">Ballroom</div>
+        <div class="hallway hallway-horizontal"></div>
+        <div class="room">Kitchen</div>
+    </div>
+</body>
+</html>
