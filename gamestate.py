@@ -1,5 +1,8 @@
 import json
 from location import Location
+from deck import Deck
+from weapon import Weapon
+
 
 class GameState():
     
@@ -12,12 +15,15 @@ class GameState():
         self.game_status = "RUNNING"
         self.list_of_locations = []
         self._make_game_board()
+        self._set_weapons()
 
         self.player_positions = {}
         self._set_player_positions()
         self.suggestions = []
         self.accusations = []
         self.case_file = None
+        self._set_cards_and_case_file()
+
 
     def start_game():
         return
@@ -53,6 +59,30 @@ class GameState():
                     from_location.add_connected_room(to_location)
         self.list_of_locations = list(locations.values())
 
+    def _set_weapons(self): # Should this be in Game?
+        with open('weapons.json', 'r') as f:
+            weapons = json.load(f)
+
+        weapon_list = []
+        for weapon in weapons:
+            weapon_list.append(Weapon(weapon_id=weapon['weapon_id'],
+                                      weapon_name=weapon['weapon_name'],
+                                      weapon_location=weapon['weapon_location']))
+        
+        #TODO: Set weapons into respective locations
+        # Candlestick = location [12] Dining Room
+        # Knife = location [0] Study
+        # Lead Pipe = location [16] Conservatory
+        # Revolver = location [10] Billiard Room
+        # Rope = location [18] Ballroom
+        # Wrench = location [20] Kitchen 
+
+        
+
+    def _set_cards_and_case_file(self): # Should this be in Game?
+        deck = Deck()
+        self.list_of_players = deck.deal(self.list_of_players)
+        self.case_file = deck.solution 
 
     def make_turn_order(self):
         """Puts player list in turn order"""

@@ -8,6 +8,7 @@ class Location():
         self.connected_rooms = []
         self.secret_passage = secret_passage
         self.occupied = False
+        self.weapon = None
 
     def is_accessible(self):
         
@@ -30,6 +31,9 @@ class Location():
 
     def get_name(self):
         return self.location_name
+    
+    def set_weapon(self, weapon):
+        self.weapon = weapon
     
     def __repr__(self):
         return f"Location(id={self.location_id}, name='{self.location_name}', room={self.is_room})"
