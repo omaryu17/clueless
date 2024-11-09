@@ -5,6 +5,11 @@ class Weapon():
         self.weapon_name = weapon_name
         self.weapon_location = weapon_location
         
+    def get_position(self):
+        return self.weapon_location
+    
+    def move_to(self, location):
+        self.weapon_location = location
     
     def check_player_accusation(self, accuser, suspect, room, weapon):
         #TODO create method 

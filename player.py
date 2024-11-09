@@ -29,6 +29,13 @@ class Player():
     def is_turn(self):
         return self.turn
     
+    def make_suggestion(self, suspect, room, weapon):
+        for card in self.hand:
+            if card.name == suspect or card.name == room or card.name == weapon:
+                print("You have that card in your hand, this suggestion will be disproven.")
+        
+        return suspect, room, weapon 
+    
     def set_inactive(self):
         self.status = False
     
