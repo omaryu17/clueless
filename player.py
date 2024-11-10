@@ -16,10 +16,6 @@ class Player():
 
     def get_character_name(self):
         return self.character
-    
-    def move_to(self, location):
-        # FIX
-        self.current_position = location
 
     def get_position(self):
         return self.current_position
@@ -34,7 +30,7 @@ class Player():
         self.status = "OUT"
     
     def __repr__(self):
-        return f"Player(id={self.player_id}, character={self.character}, status={self.status}, hand={self.hand}, disproved_cards={self.disproved_cards})"
+        return f"Player(id={self.player_id}, character={self.character}, status={self.status}, hand={self.hand}, turn={self.turn}, disproved_cards={self.disproved_cards})"
     
     def to_dict(self):
         return {

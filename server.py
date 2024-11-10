@@ -88,6 +88,7 @@ def create_game(data):
 
         # Start new game
         res = new_game.start_game()
+        print(f"Game started: {res}")
 
         #new_game.save_to_db()  # Save the game to the database
 
@@ -113,8 +114,10 @@ def move_player(data):
         location_id = data.get("location_id")
         loaded_game = load_from_db(game_id)
         if loaded_game:
-            res = loaded_game.move_character(player_id, location_id)
-            if res:
+            res = loaded_game.move_player(player_id, int(location_id))
+            print(f"RES: {res}")
+            if res[0]:
+                print(res[1])
                 # NEED TO FIND A WAY TO GIVE CLIENT A READABLE STATE OF THE GAME SO IT CAN UPDATE ITS VIEWS
                 emit("player_moved", {
                     "game_id": game_id,
@@ -139,7 +142,8 @@ def make_suggestion(data):
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.make_suggestion(player_id, suspect, room_id, weapon)
-            if res:
+            if res[0]:
+                print(res[1])
                 emit("suggestion_made", {
                     "game_id": game_id,
                     "suggester": player_id,
@@ -187,7 +191,8 @@ def make_accusation(data):
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.make_accusation(player_id, suspect, room_id, weapon)
-            if res:
+            if res[0]:
+                print(res[1])
                 emit("GAME OVER - CORRECT ACCUSATION", {
                     "game_id": game_id,
                     "accuser": player_id,

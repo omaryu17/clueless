@@ -3,7 +3,7 @@ from models import GameModel, db
 import json
 
 class Game():
-    count = 0
+    count = 1
     # TODO: FIGURE OUT WHAT OTHER CLASS VARIABLES WE NEED
 
     def __init__(self, player_ids, num_players, status):
@@ -17,9 +17,9 @@ class Game():
 
     def start_game(self):
         # players is a mapping from client_id to something
-        res = self.state.start_game()
+        started, msg = self.state.start_game()
         self.save_to_db()
-        return res
+        return (started, msg)
 
         # send message representing each player
         # needs to contain character, location, and cards 
@@ -28,55 +28,53 @@ class Game():
         print("Accusation was correct, game over")
 
     def move_player(self, player_id, location_id):
-        res = self.state.move_player(player_id, location_id)
+        moved, msg = self.state.move_player(player_id, location_id)
         self.save_to_db()
+        return (moved, msg)
 
     #  not needed, exists as logic within make suggestion
     def move_character(self, character_name, location_id):
-        moved, is_room = self.state.move_character(character_name, location_id)
-        if moved and is_room:
-            # allow for additional action, i.e. suggestion/accusation
-            pass
+        moved, msg = self.state.move_character(character_name, location_id)
         self.save_to_db()
+        return (moved, msg)
 
     def make_suggestion(self, suggester, suspect, room_id, weapon):
-        res = self.state.make_suggestion(suggester, suspect, room_id, weapon)
-        if res:
+        suggested, msg = self.state.make_suggestion(suggester, suspect, room_id, weapon)
+        if suggested:
             # allow for disprovals
             pass
         self.save_to_db()
-        pass
+        return (suggested, msg)
 
     def disprove_suggestion(self, disprover, card):
         res = self.state.disprove_suggestion(disprover, card)
         if res:
-            # was disproved
+            # was disproved or not
             pass
         else:
-            # not disproved, continue disapprovals
+            # error
             pass
         self.save_to_db()
         pass
 
     def make_accusation(self, accuser, suspect, room, weapon):
-        res = self.state.make_accusation(accuser, suspect, room, weapon)
-        if res:
-            self.end_game()
-            return res
+        res, msg = self.state.make_accusation(accuser, suspect, room, weapon)
         self.save_to_db()
+        if res and self.state.status == "OVER":
+            self.end_game()
+            return (res, msg)
         return res
 
     def end_turn(self):
         turn = self.state.advance_turn()
         self.save_to_db()
-        # return turn to client
-        pass
+        return (turn, f"It is now {turn}'s turn")
             
 
     def save_to_db(self):
         model = GameModel.query.get(self.id) if self.id else None
         if model:
-            model.player_ids = json.dumps(self.players_ids)
+            model.player_ids = json.dumps(self.player_ids)
             model.num_players = self.num_players
             model.status = self.status
             model.state = self.state.to_json()

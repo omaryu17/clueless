@@ -9,7 +9,6 @@ from accusation import Accusation
 import random
 
 class GameState():
-    
     def __init__(self, game_id, player_ids, num_players, status):
         self.game_id = game_id
         self.player_ids = player_ids
@@ -42,26 +41,30 @@ class GameState():
         # make solution
         self.make_solution()
 
-        return True
+        return (True, "Game has started")
 
 
     def move_player(self, player_id, location_id):
         location = self.locations[location_id]
         character = self.play_to_char[player_id]
+        if player_id != self.get_turn():
+            return (False, f"It is not {character.name}({player_id})'s turn")
         moved = character.move_player(location)
-        is_room = location.is_room
-        return moved, is_room
+        if moved:
+            return (moved, f"{character.name} moved to {location.location_name}") 
+        return (moved, f"{character.name} could not move to {location.location_name}")
     
 
     def make_suggestion(self, suggester_id, suspect_name, room_id, weapon):
         suggester_char = self.play_to_char[suggester_id]
-        suggester_player = suggester_char.player
+        if suggester_id != self.get_turn():
+            return (False, f"It is not {suggester_char.name}({suggester_id})'s turn")
         suggester_name = suggester_char.name
         room = self.locations[room_id]
 
         # need to be in the same room
         if suggester_char.location != room or room.is_room == False:
-            return False
+            return (False, "The suggester is not in the same room suggested or the location is not a room")
         
         suggestion = Suggestion(suggester_name, suspect_name, room.location_name, weapon)
         self.suggestions.append(suggestion)
@@ -71,7 +74,7 @@ class GameState():
         suspect_char.move_char(room) # need error handling maybe, but should only expect that client sends valid message
         # move weapon if we want
         self.status = "DISPROVING"
-        return True
+        return (True, "Suggestion is valid and was created, now in disproval process")
     
 
     # biggest thing is figuring how to get it in turn order with the client
@@ -81,11 +84,13 @@ class GameState():
         if card == suggestion.suspect or card == suggestion.room or card == suggestion.weapon:
             suggestion.set_result(disprover, True)
             self.char_to_play[suggestion.suggester].disproved_cards.append(card)
-            return True
-        return False
+            return (True, f"{disprover} has disproved the suggestion")
+        return (True, f"{disprover} did not disprove the suggestion")
         
     
     def make_accusation(self, accuser_id, suspect, room_id, weapon):
+        if accuser_id != self.get_turn():
+            return (False, f"It is not {self.play_to_char[accuser_id].name}({accuser_id})'s turn")
         room_name = self.locations[room_id].location_name
         accuser = self.play_to_char[accuser_id].player
         # change room name and weapon to objects
@@ -95,14 +100,13 @@ class GameState():
         if res:
             accusation.set_result(True)
             self.status = "OVER"
-            return True
+            return (True, "Accusation was correct, game over")
         else:
             accusation.set_result(False)
             character = self.play_to_char[accuser_id]
             character.move_char(self.locations[0])
-            return False
+            return (True, "Accusation was incorrect, player is out of the game")
         
-
 
     def move_character(self, character_name, location_id):
         location = self.locations[location_id]
@@ -159,6 +163,8 @@ class GameState():
             self.name_to_char[unplayed[0]] = character
             self.char_to_play[character.name] = None
             self.characters.append(character)
+            
+
 
 
     def make_solution(self):
@@ -173,10 +179,14 @@ class GameState():
         character_order = ["Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Professor Plum"]
         ordered_players = sorted(self.players, key=lambda player: character_order.index(player.get_character_name()))
         self.turn_order = [player.player_id for player in ordered_players]
+        self.play_to_char[self.turn_order[0]].player.turn = True
 
     def advance_turn(self):
+        self.play_to_char[self.turn_order[self.turn_index]].turn = False
         self.turn_index = (self.turn_index + 1) % self.num_players
-        return self.get_turn()
+        player_id = self.turn_order[self.turn_index]
+        self.play_to_char[player_id].turn = True
+        return player_id
     
 
     # UNUSED AS OF NOW
@@ -186,10 +196,10 @@ class GameState():
 
     # might need to add this to every initial call
     def is_turn(self, player_id):
-        return self.turn_order[self.turn_index].player_id == player_id
+        return self.turn_order[self.turn_index]== player_id
 
     def get_turn(self):
-        return self.turn_order[self.turn_index].player_id
+        return self.turn_order[self.turn_index]
 
     def to_json(self):
         return {
@@ -215,12 +225,46 @@ class GameState():
         self.players = data["players"]
         self.num_players = data["num_players"]
         self.status = data["status"]
+        
         self.players = [Player.from_dict(p) for p in data["players"]]
-        self.characters = [Character.from_dict(c) for c in data["characters"]]
-        self.name_to_char = {name: Character.from_dict(c) for name, c in data["name_to_char"].items()}
-        self.play_to_char = {player_id: Character.from_dict(c) for player_id, c in data["play_to_char"].items()}
-        self.char_to_play = {name: (Player.from_dict(p) if p is not None else None) for name, p in data["char_to_play"].items()}
         self.locations = [Location.from_dict(l) for l in data["locations"]]
+
+        # fix this, char is referencing player so it needs to have the player that was made
+        self.characters = [Character.from_dict(c) for c in data["characters"]]
+        player_set = False
+        for character in self.characters:
+            for player in self.players:
+                if character.name == player.character:
+                    character.set_player(player)
+                    player_set = True
+            if player_set == False:
+                character.set_player(None)
+
+            for c in data["characters"]:
+                if c["name"] == character.name:
+                    starting_location_id = c["starting_location"]["location_id"]
+                    starting_location = self.locations[starting_location_id]
+                    if c["location"] is not None:
+                        location_id = c["location"]["location_id"]
+                        location = self.locations[location_id]
+                        character.set_locations(location, starting_location)
+                    else:
+                        character.set_locations(None, starting_location)
+
+        self.name_to_char = {}
+        self.char_to_play = {}
+        for character in self.characters:
+            for player in self.players:
+                if character.name == player.character:
+                    self.name_to_char[character.name] = character
+                    self.char_to_play[character.name] = player
+        
+        self.play_to_char = {}
+        for player in self.players:
+            for character in self.characters:
+                if character.player and player.player_id == character.player.player_id:
+                    self.play_to_char[player.player_id] = character
+
         self.turn_order = data["turn_order"]
         self.turn_index = data["turn_index"]
         self.suggestions = [Suggestion.from_dict(s) for s in data["suggestions"]]
