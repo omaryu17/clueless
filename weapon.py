@@ -8,8 +8,12 @@ class Weapon():
     def get_position(self):
         return self.weapon_location
     
+    def get_name(self):
+        return self.weapon_name
+    
     def move_to(self, location):
         self.weapon_location = location
     
     def check_player_accusation(self, accuser, suspect, room, weapon):
+        return
         #TODO create method 

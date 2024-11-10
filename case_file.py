@@ -7,7 +7,6 @@ class CaseFile():
 
     def check_player_accusation(self, player, suspect, weapon, room):
         if (suspect == self.suspect) & (weapon == self.weapon) & (room == self.room):
-            # TODO: update game/gamestate
-            return 
+            return True
         else: 
             player.set_inactive()

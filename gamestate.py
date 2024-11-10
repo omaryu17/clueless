@@ -1,7 +1,9 @@
 import json
+import random
 from location import Location
 from deck import Deck
 from weapon import Weapon
+from case_file import CaseFile
 
 
 class GameState():
@@ -26,13 +28,28 @@ class GameState():
         self.case_file = None
         self._set_cards_and_case_file()
 
+        self.game_over = False
+        self.winner = None
+
 
     def start_game():
         return
     
+    # Set player positions
+    # Scarlet is always the first character position to be set randomly, and subsequent characters are set 
+    # clockwise from player Scarlet.
     def _set_player_positions(self):
+        starting_locations = [self.list_of_locations[count] for count in [0, 2, 4, 12, 20, 18, 16, 8, 10]]
+        room_number = random.randint(0, 8)
+
         for player in self.list_of_players:
-            self.player_positions[player.get_character_name()] = player.get_position()
+            self.player_positions[player.get_character_name()] = player.move_to(starting_locations[room_number])
+            if room_number == 0:
+                room_number = 8
+            else:
+                room_number -= 1
+        
+        # TODO Print "Player positions have been set"
     
     def _make_game_board(self): # Should this be in Game?
         """Create game board from list of locations"""
@@ -70,13 +87,14 @@ class GameState():
                                       weapon_name=weapon['weapon_name'],
                                       weapon_location=weapon['weapon_location']))
         
-        #TODO: Set weapons into respective locations by adding it to self.weapon_positions
-        # Candlestick = location [12] Dining Room
-        # Knife = location [0] Study
-        # Lead Pipe = location [16] Conservatory
-        # Revolver = location [10] Billiard Room
-        # Rope = location [18] Ballroom
-        # Wrench = location [20] Kitchen 
+        self.weapon_positions = [[self.weapon_list[0], self.list_of_locations[12]], # Candlestick = location [12] Dining Room
+                                 [self.weapon_list[1], self.list_of_locations[0]],  # Knife = location [0] Study
+                                 [self.weapon_list[2], self.list_of_locations[16]], # Lead Pipe = location [16] Conservatory 
+                                 [self.weapon_list[3], self.list_of_locations[10]], # Revolver = location [10] Billiard Room 
+                                 [self.weapon_list[4], self.list_of_locations[18]], # Rope = location [18] Ballroom 
+                                 [self.weapon_list[5], self.list_of_locations[20]]] # Wrench = location [20] Kitchen
+        # TODO Print "Weapons have been set"
+
 
     def _set_cards_and_case_file(self): # Should this be in Game?
         deck = Deck()
@@ -98,13 +116,14 @@ class GameState():
         # check if suggester has a card that will disprove their own suggestion
         for card in suggester.hand:
             if card.name == suspect or card.name == suggester.current_position or card.name == weapon:
-                print("You have that card in your hand, this suggestion will be disproven.")
+                #TODO print into Suggester-ONLY client  
+                print("You have that card in your hand, this suggestion will be disproven. Try a different combination.")
         
         # move suspect into room of the suggester
         for player in self.list_of_players:
             if player.get_character_name() == suspect.name:
                 player.move_to(suggester.get_position())
-                # TODO update self.player_positions
+                self.player_positions[player.get_character_name()] = player.move_to(suggester.current_position)
 
         # move weapon into room of the suggester
         for weapon in self.weapon_list:
@@ -117,7 +136,9 @@ class GameState():
             if player != suggester:
                 disprove_card = self.disprove_suggestions(player, suspect, weapon)
             if disprove_card != None:
-                # TODO print out that suggestion was disproven with 'disprove_card'
+                return
+                # TODO print to Disprover-ONLY suggestion was disproven with { disprove_card }
+                # TODO print to Suggester-ONLY that suggestion was disproven
 
 
     def disprove_suggestion(self, disprover, suspect, weapon):
@@ -125,3 +146,15 @@ class GameState():
             if card.name == suspect or card.name == disprover.current_position or card.name == weapon:
                 return card
         return None
+
+    # INCOMPLETE - need to make turn_order_list
+    def make_accusation(self, accuser, suspect, weapon, room):
+        accusation_check = self.case_file.check_player_accusation(accuser, suspect, weapon, room)
+        if accusation_check:
+            self.winner = accuser
+            self.game_over = True
+        # elif accusation_check == False and len(turn_order_list) != 1:
+        #   remove accuser from turn_order_list
+        # elif:
+        #   self.winner = None
+        #   self.game_over = True
