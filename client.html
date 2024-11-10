@@ -68,18 +68,54 @@
                 margin-bottom: 10px;
                 background-color: antiquewhite;
                 color: #5c3030;
+                /* display: flex; */
+                /* flex-direction: column-reverse; */
+                scroll-behavior: smooth;
+                position: sticky;
+                scroll-snap-align: end;
+                /* scroll-snap-type: mandatory; */
             }
+            
     </style>
 </head>
 <body>
     <div class="container">
         <div class="input-section">
             <h1>Game Client</h1>
-            <div id="messages"></div>
+            <div id="messages">
+            </div>
 
             <input type="number" id="numPlayersInput" placeholder="Number of Players">
             <input type="text" id="statusInput" placeholder="Game Status">
             <button onclick="createGame()">Create Game</button>
+
+            <select id="moves">
+                <option value="">Select a move</option>
+                <option value="suggestion">Make a Suggestion</option>
+                <option value="accusation">Make a Accusation</option>
+                <option value="move">Move to a Room</option>
+                <option value="showCards">Show Cards</option>
+                <option value="secPass">Use Secret Passage</option>
+                <option value="endTurn">End Turn</option>
+            </select>
+            <button onclick="chooseMove()">Choose Move</button>
+
+            <div id="roomSelec" style="display: none;">
+                <select id="roomDropdown">
+                <option value="">Select a room</option>
+                <option value="study">Study</option>
+                <option value="hall">Hall</option>
+                <option value="lounge">Lounge</option>
+                <option value="library">Library</option>
+                <option value="billiard">Billiard Room</option>
+                <option value="dining">Dining Room</option>
+                <option value="conservatory">Conservatory</option>
+                <option value="ballroom">Ballroom</option>
+                <option value="kitchen">Kitchen</option>
+            </select>
+            <button onclick="moveToRoom()">Move to Room</button>
+            </div>
+            
 
             <input type="number" id="gameIdInput" placeholder="Game ID">
             <button onclick="getGame()">Load Game</button>
@@ -90,17 +126,9 @@
             <button onclick="sendReadyMessage()">Send Ready</button>
             <button onclick="sendActionMessage()">Send Action</button>
 
-    <!-- <input type="number" id="hallwayInput" placeholder="Enter hallway number">
-    <input type="number" id="hallwaygame" placeholder="Enter game">
-    <button onclick="moveToHallway()">Move to Hallway</button><br><br> -->
             <input type="number" id="hallwayInput" placeholder="Enter hallway number">
             <input type="number" id="hallwaygame" placeholder="Enter game">
             <button onclick="moveToHallway()">Move to Hallway</button>
-
-    <!-- Button to Retrieve Current Hallway -->
-    <!-- <input type="number" id="gethallwaygame" placeholder="Enter game">
-    <button onclick="getCurrentHallway()">Get Current Hallway</button><br><br> -->
-
 
     <!-- TODO: ADD MORE MESSAGES TO SEND TO SERVER WITH RELEVANT BUTTONS -->
             <input type="number" id="gethallwaygame" placeholder="Enter game">
@@ -159,12 +187,14 @@
         socket.on('game_created', function(data) {
             const messageDiv = document.getElementById('messages');
             messageDiv.innerHTML += `<p>Game Created: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+            hideCreateGame();
         });
 
         // Listen for game loaded broadcast
         socket.on('game_loaded', function(data) {
             const messageDiv = document.getElementById('messages');
             messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+            hideCreateGame();
         });
 
         // Listen for game loaded broadcast
@@ -186,6 +216,7 @@
             socket.emit('create_game', { num_players: numPlayers, status: status });
             document.getElementById("numPlayersInput").value = "";
             document.getElementById("statusInput").value = "";
+            hideCreateGame();
         }
 
         // Send get_game event to server
@@ -193,6 +224,45 @@
             const gameId = document.getElementById('gameIdInput').value;
             socket.emit('get_game', { game_id: gameId });
             document.getElementById("gameIdInput").value = "";
+            hideCreateGame();
+        }
+        // Once the game is created - the create game & status buttons are not shown 
+        function hideCreateGame(){
+            document.getElementById("numPlayersInput").style.display = 'none';
+            document.getElementById("statusInput").style.display = 'none';
+            document.getElementById("gameIdInput").style.display = 'none';
+            document.querySelector('button[onclick="createGame()"]').style.display = 'none';
+            document.querySelector('button[onclick="getGame()"]').style.display = 'none';
+        }
+        // lists the valid moves for user
+        function chooseMove(){
+            const move = document.getElementById('moves').value;
+            if(!move){
+                alert('!!! Please make a move !!!');
+                return;
+            }
+            switch(move){
+                case 'suggestion':
+                    socket.emit('make_suggestion', {/*tbd*/});
+                case 'accusation':
+                    socket.emit('make_accusation', {/*tbd*/});
+                case 'move':
+                    document.getElementById('roomSelec').style.display = 'block';
+                    const room = document.getElementById('roomDropdown').value;
+                    if(!room){
+                        alert('!!! Please choose a room !!!');
+                        return;
+                    }else{
+                        alert('chosen room is' + room);
+                        // socket.emit('move_room', {room: room});
+                    document.getElementById('roomDropdown').value = '';
+                    document.getElementById('roomSelec').style.display = 'none';
+                        return
+                    }
+                    
+
+            }
+            document.getElementById('moves').value = '';
         }
 
     </script>
