@@ -39,7 +39,11 @@
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <script>
         // connect to server
-        const socket = io.connect("https://clueless.onrender.com/");
+        const socket = io.connect("http://127.0.0.1:5000", {
+            cors: {
+                origin: "*",
+            }
+        });
 
         // listen for server messages and display them
         socket.on("server_broadcast", function(data) {
@@ -78,13 +82,13 @@
         // Listen for game creation broadcast
         socket.on('game_created', function(data) {
             const messageDiv = document.getElementById('messages');
-            messageDiv.innerHTML += `<p>Game Created: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+            messageDiv.innerHTML += `<p>Game Created: ID= ${data.id}, Player IDs= ${data.player_ids}, Num Players= ${data.num_players}, Status= ${data.status}, State=${JSON.stringify(data.state)}</p>`;
         });
 
         // Listen for game loaded broadcast
         socket.on('game_loaded', function(data) {
             const messageDiv = document.getElementById('messages');
-            messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+            messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Player IDs= ${data.player_ids}, Num Players= ${data.num_players}, Status= ${data.status}, State=${JSON.stringify(data.state)}</p>`;
         });
 
         // Listen for game loaded broadcast

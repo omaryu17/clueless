@@ -37,7 +37,9 @@ class Deck():
         # get 1 weapon, suspect, and room
         for card_type in card_types:
             cards = self.get_type_cards(card_type)
-            self.solution.append(random.choice(cards))
+            chosen_card = random.choice(cards)
+            self.solution.append(chosen_card)
+            self.card_list.remove(chosen_card)
     
     def get_solution(self):
         return self.solution

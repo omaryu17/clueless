@@ -1,11 +1,12 @@
-# import eventlet
-# eventlet.monkey_patch()
+import eventlet
+eventlet.monkey_patch()
 
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from models import db
 from game import Game
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +18,8 @@ db.init_app(app)
 
 # later replace * with actual client url once it"s deployed
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", ping_interval=5, ping_timeout=10)
+#socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", ping_interval=5, ping_timeout=10)
+socketio = SocketIO(app, cors_allowed_origins="*")#, async_mode="gevent", ping_interval=5, ping_timeout=10)
 
 with app.app_context():
     db.drop_all()
@@ -69,63 +71,144 @@ def handle_client_action(data):
         print(f"Player {request.sid} performed an action")
         emit("server_broadcast", {"response": f"Player {request.sid} performed an action!"}, broadcast=True)
 
-
-# # Move the player to a specific hallway
-# @socketio.on("move_to_hallway")
-# def move_to_hallway(data):
-#     hallway = int(data.get("hallway", -1))  # Get hallway number from client
-#     game_id = int(data.get("game_id", -1))
-
-#     # Load game and update the hallway for the current player
-#     player_id = request.sid  
-#     game = Game(num_players=0, status='active')  # Temp game instance to load from DB
-#     game.load_from_db(game_id)  # Replace with actual game ID logic
-#     game.move_player_to_hallway(player_id, hallway)  # Update hallway
-
-#     print(f"Player {player_id} moved to hallway {hallway}")
-
-#     # Broadcast the action
-#     emit("server_broadcast", {"response": f"Player {player_id} moved to hallway {hallway}"}, broadcast=True)
-
-# # Get the current hallway of the player
-# @socketio.on("get_current_hallway")
-# def get_current_hallway(data):
-#     player_id = request.sid
-#     game_id = int(data.get("game_id", -1))
-
-#     # Load game from the database
-#     game = Game(num_players=0, status='active')
-#     game.load_from_db(game_id)  # Replace with actual game ID logic
-
-#     # Retrieve current hallway of the player
-#     current_hallway = game.get_player_hallway(player_id)
-#     print(f"Player {player_id} is in hallway {current_hallway}")
-
-#     # Send the current hallway back to the client
-#     emit("server_broadcast", {"response": f"Player {player_id} is in hallway {current_hallway}"}, to=request.sid)
-
-
 # Event to create a game and save it to the database
 @socketio.on("create_game")
 def create_game(data):
      with app.app_context():
         num_players = data.get("num_players", 2)  # Default to 2 players if not specified
-        status = data.get("status", "waiting")  # Default status is 'waiting'
+        status = data.get("status", "READY")  # Default status is 'waiting'
+
+        # Get list of all connected client SIDs
+        player_ids = [client for client in socketio.server.manager.rooms['/'].keys() if client != None]
+        print(f"Connected clients: {player_ids}")
+
 
         # Create a new game
-        new_game = Game(num_players=num_players, status=status)
-        new_game.save_to_db()  # Save the game to the database
+        new_game = Game(player_ids=player_ids, num_players=int(num_players), status=status)
+
+        # Start new game
+        res = new_game.start_game()
+
+        #new_game.save_to_db()  # Save the game to the database
 
         # Print the game's info
-        print(f"Game created: ID= {new_game.id}, Num Players= {new_game.num_players}, Status= {new_game.status}")
+        print(f"Game created: ID= {new_game.id}, Player IDs= {new_game.player_ids}, Num Players= {new_game.num_players}, Status= {new_game.status}, State= {new_game.state}")
 
         # Emit the game info to all connected clients
         emit("game_created", {
             "id": new_game.id,
+            "player_ids": json.dumps(new_game.player_ids),
             "num_players": new_game.num_players,
             "status": new_game.status,
             "state": new_game.state.to_json()  # Send the game state as a dictionary
         }, broadcast=True)
+
+
+# Event to move a player to a new location
+@socketio.on("move_player")
+def move_player(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        location_id = data.get("location_id")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.move_character(player_id, location_id)
+            if res:
+                # NEED TO FIND A WAY TO GIVE CLIENT A READABLE STATE OF THE GAME SO IT CAN UPDATE ITS VIEWS
+                emit("player_moved", {
+                    "game_id": game_id,
+                    "player_id": player_id,
+                    "location_id": location_id,
+                    "state": loaded_game.state.to_json()
+                }, broadcast=True)
+            else:
+                emit("player_move_error", {"game_id": game_id}, broadcast=True)
+        else:
+            emit("Could not loa dgame", {"game_id": game_id}, broadcast=True)
+
+# Event to make a suggestion
+@socketio.on("make_suggestion")
+def make_suggestion(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        suspect = data.get("suspect")
+        room_id = data.get("room_id")
+        weapon = data.get("weapon")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.make_suggestion(player_id, suspect, room_id, weapon)
+            if res:
+                emit("suggestion_made", {
+                    "game_id": game_id,
+                    "suggester": player_id,
+                    "suspect": suspect,
+                    "room_id": room_id,
+                    "weapon": weapon,
+                    "state": loaded_game.state.to_json()
+                }, broadcast=True)
+            else:
+                emit("suggestion_error", {"game_id": game_id}, broadcast=True)
+        else:
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
+# Event to disprove a suggestion
+@socketio.on("disprove_suggestion")
+def disprove_suggestion(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        card = data.get("card")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.disprove_suggestion(player_id, card)
+            if res:
+                emit("suggestion_disproved", {
+                    "game_id": game_id,
+                    "disprover": player_id,
+                    "card": card,
+                    "state": loaded_game.state.to_json()
+                }, broadcast=True)
+            else:
+                emit("disprove_error", {"game_id": game_id}, broadcast=True)
+        else:
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
+# Event to make an accusation
+@socketio.on("make_accusation")
+def make_accusation(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        suspect = data.get("suspect")
+        room_id = data.get("room_id")
+        weapon = data.get("weapon")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.make_accusation(player_id, suspect, room_id, weapon)
+            if res:
+                emit("GAME OVER - CORRECT ACCUSATION", {
+                    "game_id": game_id,
+                    "accuser": player_id,
+                    "suspect": suspect,
+                    "room_id": room_id,
+                    "weapon": weapon,
+                    "state": loaded_game.state.to_json()
+                }, broadcast=True)
+            else:
+                emit("FALSE ACCUSATION", {
+                    "game_id": game_id,
+                    "accuser": player_id,
+                    "suspect": suspect,
+                    "room_id": room_id,
+                    "weapon": weapon,
+                    "state": loaded_game.state.to_json()
+                }, broadcast=True)                    
+        else:
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
+
 
 # Event to load a game by ID from the database
 @socketio.on("get_game")
@@ -134,15 +217,16 @@ def get_game(data):
         game_id = data.get("game_id")
 
         # Create a new Game instance and load the data from the database
-        loaded_game = Game(num_players=0, status="inactive")  # Temporary values
+        loaded_game = Game(player_ids=None, num_players=0, status="inactive")  # Temporary values
         loaded = loaded_game.load_from_db(game_id)
         if loaded:
             # Print the game's info
-            print(f"Game loaded: ID= {loaded_game.id}, Num Players= {loaded_game.num_players}, Status= {loaded_game.status}")
+            print(f"Game loaded: ID= {loaded_game.id}, Players IDs= {loaded_game.player_ids}, Num Players= {loaded_game.num_players}, Status= {loaded_game.status}, State= {loaded_game.state}")
 
             # Emit the loaded game info to all connected clients
             emit("game_loaded", {
                 "id": loaded_game.id,
+                "player_ids": json.dumps(loaded_game.player_ids),
                 "num_players": loaded_game.num_players,
                 "status": loaded_game.status,
                 "state": loaded_game.state.to_json() 
@@ -162,7 +246,13 @@ def get_game(data):
 
 # TODO: ADD MORE MESSAGE HANDLERS FOR SPECIFIC ACTIONS
 
-
+def load_from_db(game_id):
+    loaded_game = Game(None, 0, "null")
+    loaded = loaded_game.load_from_db(game_id)
+    if loaded:
+        return loaded_game
+    else:
+        return None
 
 
 if __name__ == "__main__":
