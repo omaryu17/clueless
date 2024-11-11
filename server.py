@@ -107,10 +107,16 @@ def create_game(data):
             "state": new_game.state.to_json()  # Send the game state as a dictionary
         }, broadcast=True)
 
-        # Send game start message to first player since they go first
+        # Send message to players
         for player in play_to_chars:
             play_obj = play_to_chars[player].player
+            if play_obj.turn:
+                emit("server_broadcast", {
+                    "response": f"It is {play_to_chars[player].name} ({player})'s turn."
+                }, broadcast=True)
             emit("player_start", {
+                "character": play_to_chars[player].name,
+                "start" : play_to_chars[player].starting_location.location_name,
                 "hand": json.dumps([card.name for card in play_obj.hand]),
             }, to=player)
 
@@ -128,15 +134,16 @@ def move_player(data):
             print(f"RES: {res}")
             if res[0]:
                 print(res[1])
-                # NEED TO FIND A WAY TO GIVE CLIENT A READABLE STATE OF THE GAME SO IT CAN UPDATE ITS VIEWS
+                location = loaded_game.state.locations[int(location_id)].location_name
                 emit("player_moved", {
                     "game_id": game_id,
                     "player_id": player_id,
+                    "location": location,
                     "location_id": location_id,
                     "state": loaded_game.state.to_json()
                 }, broadcast=True)
             else:
-                emit("player_move_error", {"game_id": game_id}, broadcast=True)
+                emit("player_move_error", {"player_id" : player_id, "location" : location, "location_id" : location_id}, broadcast=True)
         else:
             emit("Could not load game", {"game_id": game_id}, broadcast=True)
 
@@ -185,9 +192,15 @@ def disprove_suggestion(data):
                 emit("suggestion_disproved", {
                     "game_id": game_id,
                     "disprover": player_id,
-                    "card": card,
                     "state": loaded_game.state.to_json()
                 }, broadcast=True)
+
+                suggestion = loaded_game.state.suggestions[-1]
+                suggester_id = loaded_game.state.char_to_play[suggestion.suggester].player_id
+
+                emit("disprover_msg", {
+                    "card": f"Your suggestion was disproved by with the card: {card}"
+                }, to=suggester_id)
             else:
                 emit("disprove_error", {"game_id": game_id}, broadcast=True)
         else:
@@ -207,7 +220,7 @@ def make_accusation(data):
             res = loaded_game.make_accusation(player_id, suspect, room_id, weapon)
             if res[0]:
                 print(res[1])
-                emit("GAME OVER - CORRECT ACCUSATION", {
+                emit("correct_acc", {
                     "game_id": game_id,
                     "accuser": player_id,
                     "suspect": suspect,
@@ -216,7 +229,7 @@ def make_accusation(data):
                     "state": loaded_game.state.to_json()
                 }, broadcast=True)
             else:
-                emit("FALSE ACCUSATION", {
+                emit("false_acc", {
                     "game_id": game_id,
                     "accuser": player_id,
                     "suspect": suspect,
@@ -226,6 +239,18 @@ def make_accusation(data):
                 }, broadcast=True)                    
         else:
             emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
+
+@socketio.on("end_turn")
+def end_turn(data):
+    with app.app_context():
+        game_id = data.get("game_id")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.end_turn()
+            emit("turn_ended", {
+                "message": res[1]
+            }, broadcast=True)
 
 
 
