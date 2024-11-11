@@ -88,7 +88,7 @@
                 <input type="number" id="numPlayersInput" placeholder="Number of Players">
                 <input type="text" id="statusInput" placeholder="Game Status">
                 <button onclick="createGame()">Create Game</button>
-                <input type="number" id="gameIdInput" placeholder="Game ID">
+                <input type="number" id="gameID" placeholder="Game ID">
                 <!-- <button onclick="getGame()">Load Game</button> -->
             </div>
             <div id="makinmoves">
@@ -110,7 +110,7 @@
                 <select id="suggestionCharacter">
                     <option value="">Select Character</option>
                     <option value="scarlet">Miss Scarlet</option>
-                    <option value="mustard">Colonel Mustard</option>
+                    <option value="mustard">Col. Mustard</option>
                     <option value="white">Mrs. White</option>
                     <option value="green">Mr. Green</option>
                     <option value="peacock">Mrs. Peacock</option>
@@ -145,7 +145,7 @@
                 <select id="accusationCharacter">
                     <option value="">Select Character</option>
                     <option value="scarlet">Miss Scarlet</option>
-                    <option value="mustard">Colonel Mustard</option>
+                    <option value="mustard">Col. Mustard</option>
                     <option value="white">Mrs. White</option>
                     <option value="green">Mr. Green</option>
                     <option value="peacock">Mrs. Peacock</option>
@@ -292,6 +292,9 @@
         socket.on('game_created', function(data) {
             const messageDiv = document.getElementById('messages');
             messageDiv.innerHTML += `<p>Game Created: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+            document.getElementById("gameID").value = data.id;
+            messageDiv.innerHTML += `<p>Player-Character mappings: ${data.players}</p>`;
+            messageDiv.innerHTML += `<p>Your player id is ${mySocketId}</p>`;
             hideCreateGame();
         });
 
@@ -336,7 +339,7 @@
         function hideCreateGame(){
             document.getElementById("numPlayersInput").style.display = 'none';
             document.getElementById("statusInput").style.display = 'none';
-            document.getElementById("gameIdInput").style.display = 'none';
+            //document.getElementById("gameIdInput").style.display = 'none';
             document.querySelector('button[onclick="createGame()"]').style.display = 'none';
             document.querySelector('button[onclick="getGame()"]').style.display = 'none';
         }
@@ -349,16 +352,13 @@
             }
             switch(move){
                 case 'suggestion':
-                document.getElementById('suggestionSection').style.display = 'block';
-                    socket.emit('make_suggestion', {/*tbd*/});
+                    document.getElementById('suggestionSection').style.display = 'block';
                     break;
                 case 'accusation':
                     document.getElementById('accusationSection').style.display = 'block';
-                    socket.emit('make_accusation', {/*tbd*/});
                     break;
                 case 'moveToLocation':
                     document.getElementById('roomSelec').style.display = 'block';
-                    socket.emit('move_to_loc', {/*tbd*/});
                     break;
                 case 'showCards':
                     socket.emit('show_cards', {/*tbd*/});
@@ -388,10 +388,11 @@
             }
 
             // Emit suggestion to server
-            socket.emit('make_suggestion', {
-                character: character,
-                weapon: weapon,
-                room: room
+            socket.emit("make_suggestion", {
+                game_id: document.getElementById("gameID").value,
+                suspect : character,
+                room_id : room,
+                weapon : weapon
             });
 
             alert(`Suggestion made: ${character} with the ${weapon} in the ${room}.`);
@@ -421,10 +422,11 @@
             }
 
             // Emit accusation to server
-            socket.emit('make_accusation', {
-                character: character,
-                weapon: weapon,
-                room: room
+            socket.emit("make_accusation", {
+                game_id : document.getElementById("gameID").value,
+                suspect: character,
+                room_id: room,
+                weapon: weapon
             });
 
             alert(`Accusation made: ${character} did it with the ${weapon} in the ${room}.`);
@@ -452,9 +454,8 @@
             alert(`Move to room: ${room}.`);
 
             // Emit move to server
-            socket.emit('move_to_loc', {
-                room: room
-            });
+            socket.emit("move_player", { game_id: document.getElementById("gameID").value, location_id: room });
+
 
             // Reset dropdowns after submission
             document.getElementById('accusationCharacter').value = '';
@@ -468,7 +469,6 @@
         function addDisproveCards(cards){
             // get the dropdown and populate with cards
         }
-
         function disproveCard(){
             const card = document.getElementById("disproveDropdown").value;
             if(!card){
@@ -479,6 +479,57 @@
             document.getElementById("disproveDropdown").style.display = 'none';
             // need to add checks with server to check for result and request 
         }
+
+        socket.on("player_moved", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>${data.player_id} moved to ${data.location} (${data.location_id})</p>`;
+        })
+
+        socket.on("player_move_error", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>${data.player_id} could not move to ${data.location} (${data.location_id})</p>`;
+        })
+
+        socket.on("player_start", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p> You are ${data.character}</p>`;
+            messageDiv.innerHTML += `<p>Your first move will be ${data.start}</p>`;
+            messageDiv.innerHTML += `<p>Your hand is ${data.hand}</p>`;
+        })
+
+        function endTurn() {
+            socket.emit("end_turn", {game_id: document.getElementById("gameID").value});
+        }
+
+        socket.on("turn_ended", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>${data.message}</p>`;
+        })
+
+        socket.on("suggestion_made", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>${data.suggester} made a suggestion: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+        })
+
+        socket.on("suggestion_disproved", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>Suggestion was disproved by ${data.disprover}.</p>`;
+        })
+
+        socket.on("disprover_msg", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>${data.card}</p>`;
+        })
+
+        socket.on("correct_acc", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>GAME OVER: ${data.accuser} made the correct accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+        })
+
+        socket.on("false_acc", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>${data.accuser} made a false accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+        })
 
     </script>
 </body>
