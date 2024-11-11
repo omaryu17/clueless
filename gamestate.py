@@ -49,8 +49,8 @@ class GameState():
         character = self.play_to_char[player_id]
         if player_id != self.get_turn():
             return (False, f"It is not {character.name}({player_id})'s turn")
-        if "MOVE" or "MOVE_TO_ROOM" not in self.get_valid_moves(player_id):
-            return (False, "Player cannot move")
+        # if "MOVE" or "MOVE_TO_ROOM" not in self.get_valid_moves(player_id):
+        #     return (False, "Player cannot move")
         moved = character.move_player(location)
         if moved:
             return (moved, f"{character.name} moved to {location.location_name}") 
@@ -61,8 +61,8 @@ class GameState():
         suggester_char = self.play_to_char[suggester_id]
         if suggester_id != self.get_turn():
             return (False, f"It is not {suggester_char.name}({suggester_id})'s turn")
-        if "SUGGEST" not in self.get_valid_moves(suggester_id):
-            return (False, "Player cannot make a suggestion")
+        # if "SUGGEST" not in self.get_valid_moves(suggester_id):
+        #     return (False, "Player cannot make a suggestion")
         suggester_name = suggester_char.name
         room = self.locations[room_id]
 
@@ -95,8 +95,8 @@ class GameState():
     def make_accusation(self, accuser_id, suspect, room_id, weapon):
         if accuser_id != self.get_turn():
             return (False, f"It is not {self.play_to_char[accuser_id].name}({accuser_id})'s turn")
-        if "ACCUSE" not in self.get_valid_moves(accuser_id):
-            return (False, "Player cannot make an accusation")
+        # if "ACCUSE" not in self.get_valid_moves(accuser_id):
+        #     return (False, "Player cannot make an accusation")
         room_name = self.locations[room_id].location_name
         accuser = self.play_to_char[accuser_id].player
         # change room name and weapon to objects

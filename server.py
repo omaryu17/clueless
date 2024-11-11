@@ -95,14 +95,24 @@ def create_game(data):
         # Print the game's info
         print(f"Game created: ID= {new_game.id}, Player IDs= {new_game.player_ids}, Num Players= {new_game.num_players}, Status= {new_game.status}, State= {new_game.state}")
 
+        play_to_chars = new_game.state.play_to_char
+        players = {pair[0] : pair[1].name for pair in play_to_chars.items()}
+
         # Emit the game info to all connected clients
         emit("game_created", {
             "id": new_game.id,
-            "player_ids": json.dumps(new_game.player_ids),
             "num_players": new_game.num_players,
+            "players": json.dumps(players),
             "status": new_game.status,
             "state": new_game.state.to_json()  # Send the game state as a dictionary
         }, broadcast=True)
+
+        # Send game start message to first player since they go first
+        for player in play_to_chars:
+            play_obj = play_to_chars[player].player
+            emit("player_start", {
+                "hand": json.dumps([card.name for card in play_obj.hand]),
+            }, to=player)
 
 
 # Event to move a player to a new location
