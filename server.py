@@ -69,61 +69,26 @@ def handle_client_action(data):
         print(f"Player {request.sid} performed an action")
         emit("server_broadcast", {"response": f"Player {request.sid} performed an action!"}, broadcast=True)
 
-
-# # Move the player to a specific hallway
-# @socketio.on("move_to_hallway")
-# def move_to_hallway(data):
-#     hallway = int(data.get("hallway", -1))  # Get hallway number from client
-#     game_id = int(data.get("game_id", -1))
-
-#     # Load game and update the hallway for the current player
-#     player_id = request.sid  
-#     game = Game(num_players=0, status='active')  # Temp game instance to load from DB
-#     game.load_from_db(game_id)  # Replace with actual game ID logic
-#     game.move_player_to_hallway(player_id, hallway)  # Update hallway
-
-#     print(f"Player {player_id} moved to hallway {hallway}")
-
-#     # Broadcast the action
-#     emit("server_broadcast", {"response": f"Player {player_id} moved to hallway {hallway}"}, broadcast=True)
-
-# # Get the current hallway of the player
-# @socketio.on("get_current_hallway")
-# def get_current_hallway(data):
-#     player_id = request.sid
-#     game_id = int(data.get("game_id", -1))
-
-#     # Load game from the database
-#     game = Game(num_players=0, status='active')
-#     game.load_from_db(game_id)  # Replace with actual game ID logic
-
-#     # Retrieve current hallway of the player
-#     current_hallway = game.get_player_hallway(player_id)
-#     print(f"Player {player_id} is in hallway {current_hallway}")
-
-#     # Send the current hallway back to the client
-#     emit("server_broadcast", {"response": f"Player {player_id} is in hallway {current_hallway}"}, to=request.sid)
-
-
 # Event to create a game and save it to the database
 @socketio.on("create_game")
 def create_game(data):
      with app.app_context():
         num_players = data.get("num_players", 2)  # Default to 2 players if not specified
         status = data.get("status", "waiting")  # Default status is 'waiting'
-
+        creator_id = request.sid
         # Create a new game
-        new_game = Game(num_players=num_players, status=status)
+        new_game = Game(num_players=num_players, status=status, creator_id=creator_id)
         new_game.save_to_db()  # Save the game to the database
-
+        # CreatorID={creator_id}
         # Print the game's info
         print(f"Game created: ID= {new_game.id}, Num Players= {new_game.num_players}, Status= {new_game.status}")
-
+        
         # Emit the game info to all connected clients
         emit("game_created", {
             "id": new_game.id,
             "num_players": new_game.num_players,
             "status": new_game.status,
+            # "creator_id": creator_id,
             "state": new_game.state.to_json()  # Send the game state as a dictionary
         }, broadcast=True)
 
