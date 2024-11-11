@@ -89,7 +89,7 @@ class GameState():
             suggestion.set_result(disprover, True)
             self.char_to_play[suggestion.suggester].disproved_cards.append(card)
             return (True, f"{disprover} has disproved the suggestion")
-        return (True, f"{disprover} did not disprove the suggestion")
+        return (False, f"{disprover} did not disprove the suggestion")
         
     
     def make_accusation(self, accuser_id, suspect, room_id, weapon):

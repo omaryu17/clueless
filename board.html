@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,6 +92,93 @@
         <div class="room">Ballroom</div>
         <div class="hallway hallway-horizontal"></div>
         <div class="room">Kitchen</div>
+    </div>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clue-less Game Board</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #202D1B;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            width: 80vmin;
+            height: 80vmin;
+        }
+        .room {
+            background-color: #472318;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+        .hallway-h {
+            background-color: #C26571;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8em;
+            height: 30%;
+            align-self: center;
+        }
+        .hallway-v {
+            background-color: #C26571;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8em;
+            width: 30%;
+            justify-self: center;
+        }
+        .player {
+            font-size: 0.7em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-board">
+        <div class="room" id=0>Study</div>
+        <div class="hallway-h" id=1>H1</div>
+        <div class="room" id=2>Hall</div>
+        <div class="hallway-h" id=3>H2</div>
+        <div class="room" id=4>Lounge</div>
+        <div class="hallway-v" id=5>H3</div>
+        <div></div>
+        <div class="hallway-v" id=6>H4</div>
+        <div></div>
+        <div class="hallway-v" id=7>H5</div>
+        <div class="room" id=8>Library</div>
+        <div class="hallway-h" id=9>H6</div>
+        <div class="room" id=10>Billiard Room</div>
+        <div class="hallway-h" id=11>H7</div>
+        <div class="room" id=12>Dining Room</div>
+        <div class="hallway-v" id=13>H8</div>
+        <div></div>
+        <div class="hallway-v" id=14>H9</div>
+        <div></div>
+        <div class="hallway-v" id=15>H10</div>
+        <div class="room" id=16>Conservatory</div>
+        <div class="hallway-h" id=17>H11</div>
+        <div class="room" id=18>Ballroom</div>
+        <div class="hallway-h" id=19>H12</div>
+        <div class="room" id=20>Kitchen</div>
     </div>
 </body>
 </html>

@@ -51,14 +51,8 @@ class Game():
 
     def disprove_suggestion(self, disprover, card):
         res = self.state.disprove_suggestion(disprover, card)
-        if res:
-            # was disproved or not
-            pass
-        else:
-            # error
-            pass
         self.save_to_db()
-        pass
+        return res
 
     def make_accusation(self, accuser, suspect, room, weapon):
         res, msg = self.state.make_accusation(accuser, suspect, room, weapon)

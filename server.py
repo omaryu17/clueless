@@ -188,7 +188,7 @@ def disprove_suggestion(data):
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.disprove_suggestion(player_id, card)
-            if res:
+            if res[0]:
                 emit("suggestion_disproved", {
                     "game_id": game_id,
                     "disprover": player_id,
