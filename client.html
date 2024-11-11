@@ -89,19 +89,56 @@
                 <input type="text" id="statusInput" placeholder="Game Status">
                 <button onclick="createGame()">Create Game</button>
                 <input type="number" id="gameIdInput" placeholder="Game ID">
-                <button onclick="getGame()">Load Game</button>
+                <!-- <button onclick="getGame()">Load Game</button> -->
             </div>
-            
-            <select id="moves">
+            <div id="makinmoves">
+                <select id="moves">
                 <option value="">Select a move</option>
                 <option value="suggestion">Make a Suggestion</option>
                 <option value="accusation">Make a Accusation</option>
                 <option value="moveToLocation">Move to a Location</option>
                 <option value="showCards">Show Cards</option>
                 <option value="secPass">Use Secret Passage</option>
-                <option value="endTurn">End Turn</option>
-            </select>
-            <button onclick="chooseMove()">Choose Move</button>
+                <!-- <option value="endTurn">End Turn</option> -->
+                </select>
+                <button onclick="chooseMove()">Choose Move</button>
+            </div>
+            
+
+            <div id="suggestionSection" style="display: none;">
+                <h3>Make an Suggestion</h3>
+                <select id="suggestionCharacter">
+                    <option value="">Select Character</option>
+                    <option value="scarlet">Miss Scarlet</option>
+                    <option value="mustard">Colonel Mustard</option>
+                    <option value="white">Mrs. White</option>
+                    <option value="green">Mr. Green</option>
+                    <option value="peacock">Mrs. Peacock</option>
+                    <option value="plum">Professor Plum</option>
+                </select>
+                <select id="suggestionWeapon">
+                    <option value="">Select Weapon</option>
+                    <option value="candlestick">Candlestick</option>
+                    <option value="dagger">Dagger</option>
+                    <option value="leadPipe">Lead Pipe</option>
+                    <option value="revolver">Revolver</option>
+                    <option value="rope">Rope</option>
+                    <option value="wrench">Wrench</option>
+                </select>
+                <select id="suggestionRoom">
+                    <option value="">Select Room</option>
+                    <option value="0">Study</option>
+                    <option value="2">Hall</option>
+                    <option value="4">Lounge</option>
+                    <option value="8">Library</option>
+                    <option value="10">Billiard Room</option>
+                    <option value="12">Dining Room</option>
+                    <option value="16">Conservatory</option>
+                    <option value="18">Ballroom</option>
+                    <option value="20">Kitchen</option>
+                </select>
+                <button onclick="makeSuggestion()">Submit Suggestion</button>
+            </div>
 
             <div id="accusationSection" style="display: none;">
                 <h3>Make an Accusation</h3>
@@ -140,46 +177,56 @@
 
             <div id="roomSelec" style="display: none;">
                 <select id="roomDropdown">
-                <option value="">Select a room</option>
-                <option value="0">Study</option>
-                <option value="1">Study to Hall</option>
-                <option value="2">Hall</option>
-                <option value="3">Hall to Lounge</option>
-                <option value="4">Lounge</option>
-                <option value="5">Study to Library</option>
-                <option value="6">Hall to Billiard</option>
-                <option value="7">Lounge to Dining</option>
-                <option value="8">Library</option>
-                <option value="9">Library to Billiard</option>
-                <option value="10">Billiard Room</option>
-                <option value="11">Billiard to Dining</option>
-                <option value="12">Dining Room</option>
-                <option value="13">Library to Conservatory</option>
-                <option value="14">Billiard to Ballroom</option>
-                <option value="15">Dining to Kitchen</option>
-                <option value="16">Conservatory</option>
-                <option value="17">Conservatory to Ballroom</option>
-                <option value="18">Ballroom</option>
-                <option value="19">Ballroom to Kitchen</option>
-                <option value="20">Kitchen</option>
-            </select>
-            <button onclick="moveToLocation()">Move to Room</button>
+                    <option value="">Select a room</option>
+                    <option value="0">Study</option>
+                    <option value="1">Study to Hall</option>
+                    <option value="2">Hall</option>
+                    <option value="3">Hall to Lounge</option>
+                    <option value="4">Lounge</option>
+                    <option value="5">Study to Library</option>
+                    <option value="6">Hall to Billiard</option>
+                    <option value="7">Lounge to Dining</option>
+                    <option value="8">Library</option>
+                    <option value="9">Library to Billiard</option>
+                    <option value="10">Billiard Room</option>
+                    <option value="11">Billiard to Dining</option>
+                    <option value="12">Dining Room</option>
+                    <option value="13">Library to Conservatory</option>
+                    <option value="14">Billiard to Ballroom</option>
+                    <option value="15">Dining to Kitchen</option>
+                    <option value="16">Conservatory</option>
+                    <option value="17">Conservatory to Ballroom</option>
+                    <option value="18">Ballroom</option>
+                    <option value="19">Ballroom to Kitchen</option>
+                    <option value="20">Kitchen</option>
+                </select>
+                <button onclick="moveToLoc()">Move to Room</button>
+            </div>
+            <div id="temp" style="display: none;">
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send Message</button>
+
+                <button onclick="sendReadyMessage()">Send Ready</button>
+                <button onclick="sendActionMessage()">Send Action</button>
+
+                <div id="enterHallway" style="display: none;">
+                    <input type="number" id="hallwayInput" placeholder="Enter hallway number">
+                    <button onclick="moveToHallway()">Move to Hallway</button>
+                </div>
+                <input type="number" id="hallwaygame" placeholder="Enter game" style="display: none;">
+                
+                <input type="number" id="gethallwaygame" placeholder="Enter game">
+                <button onclick="getCurrentHallway()">Get Current Hallway</button>
+            </div>
+            <div id="endTurn">
+                <!-- need to implement the end turn fucntion -->
+                <button onclick="endTurn()">End Turn</button> 
             </div>
 
-            <input type="text" id="messageInput" placeholder="Type a message...">
-            <button onclick="sendMessage()">Send Message</button>
-
-            <button onclick="sendReadyMessage()">Send Ready</button>
-            <button onclick="sendActionMessage()">Send Action</button>
-
-            <div id="enterHallway" style="display: none;">
-                <input type="number" id="hallwayInput" placeholder="Enter hallway number">
-                <button onclick="moveToHallway()">Move to Hallway</button>
+            <div id="disprove">
+                <!-- tbd -->
             </div>
-            <input type="number" id="hallwaygame" placeholder="Enter game" style="display: none;">
             
-            <input type="number" id="gethallwaygame" placeholder="Enter game">
-            <button onclick="getCurrentHallway()">Get Current Hallway</button>
         </div>
         <div class="board-section">
             <iframe id="gameBoard" src="board.html" style="width: 100%; height: 100%; border: none;"></iframe>
@@ -240,7 +287,6 @@
         // Listen for game creation broadcast
         socket.on('game_created', function(data) {
             const messageDiv = document.getElementById('messages');
-            // CreatorID=${data.creator_id}
             messageDiv.innerHTML += `<p>Game Created: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
             hideCreateGame();
         });
@@ -279,8 +325,9 @@
             const gameId = document.getElementById('gameIdInput').value;
             socket.emit('get_game', { game_id: gameId });
             document.getElementById("gameIdInput").value = "";
-            // hideCreateGame();
+            hideCreateGame();
         }
+
         // Once the game is created - the create game & status buttons are not shown 
         function hideCreateGame(){
             document.getElementById("numPlayersInput").style.display = 'none';
@@ -306,17 +353,7 @@
                     break;
                 case 'moveToLocation':
                     document.getElementById('roomSelec').style.display = 'block';
-                    const room = document.getElementById('roomDropdown').value;
-                    if(!room){
-                        alert('!!! Please choose a room !!!');
-                        return;
-                    }else{
-                        alert('chosen room is' + room);
-                        // socket.emit('move_room', {room: room});
-                        document.getElementById('roomDropdown').value = '';
-                        document.getElementById('roomSelec').style.display = 'none';
-                        return;
-                    }
+                    socket.emit('move_to_loc', {/*tbd*/});
                     break;
                 case 'showCards':
                     socket.emit('show_cards', {/*tbd*/});
@@ -330,6 +367,39 @@
             }
             document.getElementById('moves').value = '';
         }
+
+        function showSuggestionSection() {
+            document.getElementById('suggestionSection').style.display = 'block';
+        }
+
+        function makeSuggestion() {
+            const character = document.getElementById('suggestionCharacter').value;
+            const weapon = document.getElementById('suggestionWeapon').value;
+            const room = document.getElementById('suggestionRoom').value;
+
+            if (!character || !weapon || !room) {
+                alert('Please select a character, weapon, and room for your suggestion.');
+                return;
+            }
+
+            // Emit suggestion to server
+            socket.emit('make_suggestion', {
+                character: character,
+                weapon: weapon,
+                room: room
+            });
+
+            alert(`Suggestion made: ${character} with the ${weapon} in the ${room}.`);
+
+            // Reset dropdowns after submission
+            document.getElementById('suggestionCharacter').value = '';
+            document.getElementById('suggestionWeapon').value = '';
+            document.getElementById('suggestionRoom').value = '';
+
+            // Hide the suggestion section
+            document.getElementById('suggestionSection').style.display = 'none';
+        }
+
 
         function showAccusationSection() {
             document.getElementById('accusationSection').style.display = 'block';
@@ -353,6 +423,33 @@
             });
 
             alert(`Accusation made: ${character} did it with the ${weapon} in the ${room}.`);
+
+            // Reset dropdowns after submission
+            document.getElementById('accusationCharacter').value = '';
+            document.getElementById('accusationWeapon').value = '';
+            document.getElementById('accusationRoom').value = '';
+
+            // Hide the accusation section
+            document.getElementById('accusationSection').style.display = 'none';
+        }
+
+        function moveToLoc() {
+            const room = document.getElementById('roomDropdown').value;
+            if(!room){
+                alert('!!! Please choose a room !!!');
+                return;
+            }else{
+                // alert('chosen room is ' + room);
+                document.getElementById('roomDropdown').value = '';
+                document.getElementById('roomSelec').style.display = 'none';
+                // return;
+            }
+            alert(`Move to room: ${room}.`);
+
+            // Emit move to server
+            socket.emit('move_to_loc', {
+                room: room
+            });
 
             // Reset dropdowns after submission
             document.getElementById('accusationCharacter').value = '';
