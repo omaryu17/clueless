@@ -13,7 +13,7 @@ class Suggestion():
         self.disproved = disproved
 
     def __repr__(self):
-        return f"Suggestion(suggester={self.suggester}, suspect={self.suspect}, weapon={self.weapon}, room={self.room}, disprover={self.disprover}, result={self.result})"
+        return f"Suggestion(suggester={self.suggester}, suspect={self.suspect}, weapon={self.weapon}, room={self.room}, disprover={self.disprover}, disproved={self.disproved})"
     
     def to_dict(self):
         return {
@@ -21,7 +21,7 @@ class Suggestion():
             'suspect': self.suspect,
             'weapon': self.weapon,
             'room': self.room,
-            'disproved': self.status,
+            'disproved': self.disproved,
             'disprover': self.disprover,
         }
     

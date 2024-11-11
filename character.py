@@ -2,7 +2,7 @@ from location import Location
 from player import Player
 
 class Character():
-    character_starts = [("Miss Scarlett", 3), ("Col. Mustard", 7), ("Mrs. White", 19), ("Mr. Green", 17), ("Mrs. Peacock", 13), ("Professor Plum", 5)]
+    character_starts = [("Miss Scarlet", 3), ("Col. Mustard", 7), ("Mrs. White", 19), ("Mr. Green", 17), ("Mrs. Peacock", 13), ("Professor Plum", 5)]
 
     def __init__(self, name, location, starting_location, player):
         self.name = name    # name of character

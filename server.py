@@ -128,7 +128,7 @@ def move_player(data):
             else:
                 emit("player_move_error", {"game_id": game_id}, broadcast=True)
         else:
-            emit("Could not loa dgame", {"game_id": game_id}, broadcast=True)
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
 
 # Event to make a suggestion
 @socketio.on("make_suggestion")
@@ -143,14 +143,18 @@ def make_suggestion(data):
         if loaded_game:
             res = loaded_game.make_suggestion(player_id, suspect, room_id, weapon)
             if res[0]:
-                print(res[1])
+                # res[1] -> msg
+                # res[2] -> disprover_id
+                # res[3] -> choices
                 emit("suggestion_made", {
                     "game_id": game_id,
                     "suggester": player_id,
                     "suspect": suspect,
                     "room_id": room_id,
                     "weapon": weapon,
-                    "state": loaded_game.state.to_json()
+                    "state": loaded_game.state.to_json(),
+                    "disprover_id": res[2],
+                    "choices": json.dumps(res[3])
                 }, broadcast=True)
             else:
                 emit("suggestion_error", {"game_id": game_id}, broadcast=True)

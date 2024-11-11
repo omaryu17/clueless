@@ -39,12 +39,15 @@ class Game():
         return (moved, msg)
 
     def make_suggestion(self, suggester, suspect, room_id, weapon):
-        suggested, msg = self.state.make_suggestion(suggester, suspect, room_id, weapon)
-        if suggested:
-            # allow for disprovals
-            pass
+        res = self.state.make_suggestion(suggester, suspect, room_id, weapon)
         self.save_to_db()
-        return (suggested, msg)
+        if res[0]:
+            # allow for disprovals
+            msg = res[1]
+            disprover_id = res[2]
+            choices = res[3]
+            return (res[0], msg, disprover_id, choices)
+        return (res[0], res[1])
 
     def disprove_suggestion(self, disprover, card):
         res = self.state.disprove_suggestion(disprover, card)
@@ -66,9 +69,9 @@ class Game():
         return res
 
     def end_turn(self):
-        turn = self.state.advance_turn()
+        turn, next_options = self.state.advance_turn()
         self.save_to_db()
-        return (turn, f"It is now {turn}'s turn")
+        return (turn, next_options, f"It is now {turn}'s turn")
             
 
     def save_to_db(self):

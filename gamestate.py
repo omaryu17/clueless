@@ -23,7 +23,7 @@ class GameState():
         self.play_to_char = {} # player id to character object
         self.char_to_play = {} # character name to player object
         self.locations = [] # list of location objects, sorted by id
-        self.turn_order = [] # list of player objects in turn order
+        self.turn_order = [] # list of player ids in turn order
         self.turn_index = 0   # index of player in turn order
         self.suggestions = [] # list of suggestions
         self.accusations = [] # list of accusations
@@ -49,6 +49,8 @@ class GameState():
         character = self.play_to_char[player_id]
         if player_id != self.get_turn():
             return (False, f"It is not {character.name}({player_id})'s turn")
+        if "MOVE" or "MOVE_TO_ROOM" not in self.get_valid_moves(player_id):
+            return (False, "Player cannot move")
         moved = character.move_player(location)
         if moved:
             return (moved, f"{character.name} moved to {location.location_name}") 
@@ -59,6 +61,8 @@ class GameState():
         suggester_char = self.play_to_char[suggester_id]
         if suggester_id != self.get_turn():
             return (False, f"It is not {suggester_char.name}({suggester_id})'s turn")
+        if "SUGGEST" not in self.get_valid_moves(suggester_id):
+            return (False, "Player cannot make a suggestion")
         suggester_name = suggester_char.name
         room = self.locations[room_id]
 
@@ -73,8 +77,8 @@ class GameState():
         suspect_char = self.name_to_char[suspect_name]
         suspect_char.move_char(room) # need error handling maybe, but should only expect that client sends valid message
         # move weapon if we want
-        self.status = "DISPROVING"
-        return (True, "Suggestion is valid and was created, now in disproval process")
+        disprover_id, choices = self.get_disprover(suggestion)
+        return (True, f"Suggestion was created, disprover is {disprover_id}", disprover_id, choices)
     
 
     # biggest thing is figuring how to get it in turn order with the client
@@ -91,6 +95,8 @@ class GameState():
     def make_accusation(self, accuser_id, suspect, room_id, weapon):
         if accuser_id != self.get_turn():
             return (False, f"It is not {self.play_to_char[accuser_id].name}({accuser_id})'s turn")
+        if "ACCUSE" not in self.get_valid_moves(accuser_id):
+            return (False, "Player cannot make an accusation")
         room_name = self.locations[room_id].location_name
         accuser = self.play_to_char[accuser_id].player
         # change room name and weapon to objects
@@ -144,9 +150,8 @@ class GameState():
         self.status = "READY"
     
 
-
     def setup_players(self):
-        character_starts = [("Miss Scarlett", 3), ("Col. Mustard", 7), ("Mrs. White", 19), ("Mr. Green", 17), ("Mrs. Peacock", 13), ("Professor Plum", 5)]
+        character_starts = [("Miss Scarlet", 3), ("Col. Mustard", 7), ("Mrs. White", 19), ("Mr. Green", 17), ("Mrs. Peacock", 13), ("Professor Plum", 5)]
         random.shuffle(character_starts)
         for i in range(self.num_players):
             choice = character_starts.pop()
@@ -165,8 +170,6 @@ class GameState():
             self.characters.append(character)
             
 
-
-
     def make_solution(self):
         deck = Deck()
         deck.deal(self.players)
@@ -176,7 +179,7 @@ class GameState():
 
     def make_turn_order(self):
         """Puts player list in turn order"""
-        character_order = ["Miss Scarlett", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Professor Plum"]
+        character_order = ["Miss Scarlet", "Col. Mustard", "Mrs. White", "Mr. Green", "Mrs. Peacock", "Professor Plum"]
         ordered_players = sorted(self.players, key=lambda player: character_order.index(player.get_character_name()))
         self.turn_order = [player.player_id for player in ordered_players]
         self.play_to_char[self.turn_order[0]].player.turn = True
@@ -186,7 +189,7 @@ class GameState():
         self.turn_index = (self.turn_index + 1) % self.num_players
         player_id = self.turn_order[self.turn_index]
         self.play_to_char[player_id].turn = True
-        return player_id
+        return (player_id, self.get_valid_moves(player_id))
     
 
     # UNUSED AS OF NOW
@@ -197,9 +200,49 @@ class GameState():
     # might need to add this to every initial call
     def is_turn(self, player_id):
         return self.turn_order[self.turn_index]== player_id
+    
+
+    def get_valid_moves(self, player_id):
+        moves = []
+        character = self.play_to_char[player_id]
+        player = character.player
+        location = character.location
+        if location.is_room:
+            moves.append("MOVE")
+            moves.append("SUGGEST")
+        else:
+            moves.append("MOVE_TO_ROOM")
+
+        if player.status != "OUT":
+            moves.append("ACCUSE")
+        return moves    
+
 
     def get_turn(self):
         return self.turn_order[self.turn_index]
+    
+    def get_next_players(self):
+        start_idx = (self.turn_index + 1) % self.num_players
+        next_players = []
+        for i in range(self.num_players - 1):
+            next_players.append(self.play_to_char[self.turn_order[(start_idx + i) % self.num_players]].player)
+        return next_players
+    
+    def get_disprover(self, suggestion):
+        suggestions = [suggestion.suspect, suggestion.room, suggestion.weapon]
+        choices = []
+        
+        players = self.get_next_players()
+        disprover_id = None
+        for player in players:
+            if disprover_id:
+                break
+            for card in player.hand:
+                if card.name in suggestions:
+                    choices.append(card.name)
+                    disprover_id = player.player_id
+
+        return disprover_id, choices
 
     def to_json(self):
         return {
@@ -270,6 +313,15 @@ class GameState():
         self.suggestions = [Suggestion.from_dict(s) for s in data["suggestions"]]
         self.accusations = [Accusation.from_dict(a) for a in data["accusations"]]
         self.case_file = CaseFile.from_dict(data["case_file"]) if data["case_file"] else None
+
+
+    def move_starters(self):
+        for character in self.characters:
+            if character.player:
+                res = character.move_player(character.starting_location)
+                if res:
+                    print(f"{character.name} moved to {character.starting_location}")
+        
 
 
 
