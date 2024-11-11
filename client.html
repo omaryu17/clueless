@@ -224,7 +224,11 @@
             </div>
 
             <div id="disprove">
-                <!-- tbd -->
+                <select id="disproveDropdown">
+                    <option value = ""> Select a card to show </option>
+                    <!-- tbd -->
+                </select>
+                <button onclick="disproveCard()">Show Card</button>
             </div>
             
         </div>
@@ -345,6 +349,7 @@
             }
             switch(move){
                 case 'suggestion':
+                document.getElementById('suggestionSection').style.display = 'block';
                     socket.emit('make_suggestion', {/*tbd*/});
                     break;
                 case 'accusation':
@@ -458,6 +463,21 @@
 
             // Hide the accusation section
             document.getElementById('accusationSection').style.display = 'none';
+        }
+
+        function addDisproveCards(cards){
+            // get the dropdown and populate with cards
+        }
+
+        function disproveCard(){
+            const card = document.getElementById("disproveDropdown").value;
+            if(!card){
+                alert('!!! Choose a card !!!');
+                return;
+            }
+            socket.emit('disprove', {card: card});
+            document.getElementById("disproveDropdown").style.display = 'none';
+            // need to add checks with server to check for result and request 
         }
 
     </script>
