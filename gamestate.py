@@ -189,7 +189,7 @@ class GameState():
         self.turn_index = (self.turn_index + 1) % self.num_players
         player_id = self.turn_order[self.turn_index]
         self.play_to_char[player_id].turn = True
-        return player_id #self.get_valid_moves(player_id))
+        return player_id, f"{self.play_to_char[player_id].name} ({player_id})" #self.get_valid_moves(player_id))
     
 
     # UNUSED AS OF NOW

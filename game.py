@@ -63,9 +63,9 @@ class Game():
         return res
 
     def end_turn(self):
-        turn = self.state.advance_turn()
+        turn, msg = self.state.advance_turn()
         self.save_to_db()
-        return (turn, f"It is now {turn}'s turn")
+        return (turn, f"It is now {msg}'s turn")
             
 
     def save_to_db(self):

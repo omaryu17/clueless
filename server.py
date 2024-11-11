@@ -131,13 +131,14 @@ def move_player(data):
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.move_player(player_id, int(location_id))
+            location = loaded_game.state.locations[int(location_id)].location_name
             print(f"RES: {res}")
             if res[0]:
                 print(res[1])
-                location = loaded_game.state.locations[int(location_id)].location_name
                 emit("player_moved", {
                     "game_id": game_id,
                     "player_id": player_id,
+                    "character": loaded_game.state.play_to_char[player_id].name,
                     "location": location,
                     "location_id": location_id,
                     "state": loaded_game.state.to_json()
@@ -154,7 +155,7 @@ def make_suggestion(data):
         player_id = request.sid
         game_id = data.get("game_id")
         suspect = data.get("suspect")
-        room_id = data.get("room_id")
+        room_id = int(data.get("room_id"))
         weapon = data.get("weapon")
         loaded_game = load_from_db(game_id)
         if loaded_game:
@@ -213,7 +214,7 @@ def make_accusation(data):
         player_id = request.sid
         game_id = data.get("game_id")
         suspect = data.get("suspect")
-        room_id = data.get("room_id")
+        room_id = int(data.get("room_id"))
         weapon = data.get("weapon")
         loaded_game = load_from_db(game_id)
         if loaded_game:
@@ -251,7 +252,6 @@ def end_turn(data):
             emit("turn_ended", {
                 "message": res[1]
             }, broadcast=True)
-
 
 
 # Event to load a game by ID from the database

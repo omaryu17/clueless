@@ -482,7 +482,7 @@
 
         socket.on("player_moved", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.player_id} moved to ${data.location} (${data.location_id})</p>`;
+            messageDiv.innerHTML += `<p>${data.character} (${data.player_id}) moved to ${data.location} (${data.location_id})</p>`;
         })
 
         socket.on("player_move_error", function(data) {
