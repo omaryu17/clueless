@@ -96,7 +96,7 @@
                 <option value="">Select a move</option>
                 <option value="suggestion">Make a Suggestion</option>
                 <option value="accusation">Make a Accusation</option>
-                <option value="moveToRoom">Move to a Room</option>
+                <option value="moveToLocation">Move to a Location</option>
                 <option value="showCards">Show Cards</option>
                 <option value="secPass">Use Secret Passage</option>
                 <option value="endTurn">End Turn</option>
@@ -125,15 +125,15 @@
                 </select>
                 <select id="accusationRoom">
                     <option value="">Select Room</option>
-                    <option value="study">Study</option>
-                    <option value="hall">Hall</option>
-                    <option value="lounge">Lounge</option>
-                    <option value="library">Library</option>
-                    <option value="billiardRoom">Billiard Room</option>
-                    <option value="diningRoom">Dining Room</option>
-                    <option value="conservatory">Conservatory</option>
-                    <option value="ballroom">Ballroom</option>
-                    <option value="kitchen">Kitchen</option>
+                    <option value="0">Study</option>
+                    <option value="2">Hall</option>
+                    <option value="4">Lounge</option>
+                    <option value="8">Library</option>
+                    <option value="10">Billiard Room</option>
+                    <option value="12">Dining Room</option>
+                    <option value="16">Conservatory</option>
+                    <option value="18">Ballroom</option>
+                    <option value="20">Kitchen</option>
                 </select>
                 <button onclick="makeAccusation()">Submit Accusation</button>
             </div>
@@ -141,17 +141,29 @@
             <div id="roomSelec" style="display: none;">
                 <select id="roomDropdown">
                 <option value="">Select a room</option>
-                <option value="study">Study</option>
-                <option value="hall">Hall</option>
-                <option value="lounge">Lounge</option>
-                <option value="library">Library</option>
-                <option value="billiard">Billiard Room</option>
-                <option value="dining">Dining Room</option>
-                <option value="conservatory">Conservatory</option>
-                <option value="ballroom">Ballroom</option>
-                <option value="kitchen">Kitchen</option>
+                <option value="0">Study</option>
+                <option value="1">Study to Hall</option>
+                <option value="2">Hall</option>
+                <option value="3">Hall to Lounge</option>
+                <option value="4">Lounge</option>
+                <option value="5">Study to Library</option>
+                <option value="6">Hall to Billiard</option>
+                <option value="7">Lounge to Dining</option>
+                <option value="8">Library</option>
+                <option value="9">Library to Billiard</option>
+                <option value="10">Billiard Room</option>
+                <option value="11">Billiard to Dining</option>
+                <option value="12">Dining Room</option>
+                <option value="13">Library to Conservatory</option>
+                <option value="14">Billiard to Ballroom</option>
+                <option value="15">Dining to Kitchen</option>
+                <option value="16">Conservatory</option>
+                <option value="17">Conservatory to Ballroom</option>
+                <option value="18">Ballroom</option>
+                <option value="19">Ballroom to Kitchen</option>
+                <option value="20">Kitchen</option>
             </select>
-            <button onclick="moveToRoom()">Move to Room</button>
+            <button onclick="moveToLocation()">Move to Room</button>
             </div>
 
             <input type="text" id="messageInput" placeholder="Type a message...">
@@ -230,11 +242,6 @@
             const messageDiv = document.getElementById('messages');
             // CreatorID=${data.creator_id}
             messageDiv.innerHTML += `<p>Game Created: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
-            // if(data.)
-            // hideCreateGame();
-            // if(data.creator_id === socket.id) {
-            //     hideCreateGame();
-            // }
             hideCreateGame();
         });
 
@@ -297,7 +304,7 @@
                     document.getElementById('accusationSection').style.display = 'block';
                     socket.emit('make_accusation', {/*tbd*/});
                     break;
-                case 'moveToRoom':
+                case 'moveToLocation':
                     document.getElementById('roomSelec').style.display = 'block';
                     const room = document.getElementById('roomDropdown').value;
                     if(!room){
