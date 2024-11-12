@@ -176,6 +176,10 @@ def make_suggestion(data):
                     "disprover_id": res[2],
                     "choices": json.dumps(res[3])
                 }, broadcast=True)
+
+                emit("start_disprove", {
+                    "disprover_id" : res[2]
+                }, to=res[2])
             else:
                 emit("suggestion_error", {"game_id": game_id}, broadcast=True)
         else:

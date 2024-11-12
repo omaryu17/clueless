@@ -476,7 +476,7 @@
                 alert('!!! Choose a card !!!');
                 return;
             }
-            socket.emit('disprove', {card: card});
+            socket.emit("disprove_suggestion", {game_id: document.getElementById("gameID").value, card : card});
             document.getElementById("disproveDropdown").style.display = 'none';
             // need to add checks with server to check for result and request 
         }
@@ -515,6 +515,13 @@
         socket.on("suggestion_disproved", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>Suggestion was disproved by ${data.disprover}.</p>`;
+        })
+
+        socket.on("start_disprove", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>You are disproving the suggestion.</p>`;
+            const disprover_id = data.disprover_id;
+            // enable disproving stuff here
         })
 
         socket.on("disprover_msg", function(data) {
