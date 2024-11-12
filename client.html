@@ -224,6 +224,7 @@
             </div>
 
             <div id="disprove">
+                <button onclick="disprove()">Disprove Player</button>
                 <select id="disproveDropdown">
                     <option value = ""> Select a card to show </option>
                     <!-- tbd -->
@@ -240,7 +241,7 @@
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <script>
         let inGame = false;
-
+        let playerHand = null;
         // connect to server
         const socket = io.connect("http://127.0.0.1:5000");
 
@@ -468,6 +469,13 @@
 
         function addDisproveCards(cards){
             // get the dropdown and populate with cards
+            const disproveHands = document.getElementById("disproveDropdown");
+            disproveHands.innerHTML = '';
+            cards.forEach(card => {
+                const curr = document.createElement('option');
+                option.value = card;
+                disproveHands.appendChild(curr);
+            });
         }
         function disproveCard(){
             const card = document.getElementById("disproveDropdown").value;
@@ -492,9 +500,13 @@
 
         socket.on("player_start", function(data) {
             const messageDiv = document.getElementById("messages");
+            // const disproveHands = document.getElementById("disproveDropdown");
             messageDiv.innerHTML += `<p> You are ${data.character}</p>`;
             messageDiv.innerHTML += `<p>Your first move will be ${data.start}</p>`;
             messageDiv.innerHTML += `<p>Your hand is ${data.hand}</p>`;
+            playerHand = data.hand;
+            
+
         })
 
         function endTurn() {
