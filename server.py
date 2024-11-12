@@ -19,7 +19,7 @@ db.init_app(app)
 # later replace * with actual client url once it"s deployed
 
 #socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", ping_interval=5, ping_timeout=10)
-socketio = SocketIO(app, cors_allowed_origins="*")#, async_mode="gevent", ping_interval=5, ping_timeout=10)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", ping_interval=5, ping_timeout=10)
 
 with app.app_context():
     db.drop_all()
