@@ -505,8 +505,8 @@
             messageDiv.innerHTML += `<p> You are ${data.character}</p>`;
             messageDiv.innerHTML += `<p>Your first move will be ${data.start}</p>`;
             messageDiv.innerHTML += `<p>Your hand is ${data.hand}</p>`;
-            playerHand = data.hand;
-            
+            //playerHand = data.hand;
+            // addDisproveCards(data.hand);
 
         })
 
@@ -521,13 +521,13 @@
 
         socket.on("suggestion_made", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.suggester} made a suggestion: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.innerHTML += `<p>${data.character} (${data.suggester}) made a suggestion: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
             messageDiv.innerHTML += `<p>${data.suspect} was moved to the ${data.room}.</p>`;
         })
 
         socket.on("suggestion_disproved", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>Suggestion was disproved by ${data.disprover}.</p>`;
+            messageDiv.innerHTML += `<p>Suggestion was disproved by ${data.character} (${data.disprover}).</p>`;
         })
 
         socket.on("start_disprove", function(data) {
@@ -535,6 +535,18 @@
             messageDiv.innerHTML += `<p>You are disproving the suggestion. Your choices are: ${data.choices}.</p>`;
             const disprover_id = data.disprover_id;
             // enable disproving stuff here
+            const disproveDropdown = document.getElementById('disproveDropdown');
+            disproveDropdown.innerHTML = '<option value="">Select a card to show</option>';
+            
+            JSON.parse(data.choices).forEach(card => {
+                const option = document.createElement('option');
+                option.value = 'tempo';
+                option.textContent = 'card';
+                disproveDropdown.appendChild(option);
+                option.value = card;
+                option.textContent = card;
+                disproveDropdown.appendChild(option);
+            });
         })
 
         socket.on("disprover_msg", function(data) {

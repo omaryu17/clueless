@@ -97,7 +97,7 @@ def create_game(data):
 
         play_to_chars = new_game.state.play_to_char
         players = {pair[0] : pair[1].name for pair in play_to_chars.items()}
-
+        print(new_game.state.case_file)
         # Emit the game info to all connected clients
         emit("game_created", {
             "id": new_game.id,
@@ -161,6 +161,7 @@ def make_suggestion(data):
         if loaded_game:
             res = loaded_game.make_suggestion(player_id, suspect, room_id, weapon)
             location = loaded_game.state.locations[int(room_id)].location_name
+            character = loaded_game.state.play_to_char[player_id].name
             if res[0]:
                 # res[1] -> msg
                 # res[2] -> disprover_id
@@ -168,6 +169,7 @@ def make_suggestion(data):
                 emit("suggestion_made", {
                     "game_id": game_id,
                     "suggester": player_id,
+                    "character": character,
                     "suspect": suspect,
                     "room": location,
                     "room_id": room_id,
@@ -194,9 +196,11 @@ def disprove_suggestion(data):
         if loaded_game:
             res = loaded_game.disprove_suggestion(player_id, card)
             if res[0]:
+                character = loaded_game.state.play_to_char[player_id].name
                 emit("suggestion_disproved", {
                     "game_id": game_id,
                     "disprover": player_id,
+                    "character": character,
                     "state": loaded_game.state.to_json()
                 }, broadcast=True)
 
@@ -204,7 +208,7 @@ def disprove_suggestion(data):
                 suggester_id = loaded_game.state.char_to_play[suggestion.suggester].player_id
 
                 emit("disprover_msg", {
-                    "card": f"Your suggestion was disproved by with the card: {card}"
+                    "card": f"Your suggestion was disproved by {character} with the card: {card}"
                 }, to=suggester_id)
             else:
                 emit("disprove_error", {"game_id": game_id}, broadcast=True)
