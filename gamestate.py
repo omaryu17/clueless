@@ -107,12 +107,12 @@ class GameState():
         if res:
             accusation.set_result(True)
             self.status = "OVER"
-            return (True, True, "Accusation was correct, game over")
+            return (True, True, f"Accusation by {self.play_to_char[accuser_id].name} ({accuser_id}) was correct, game over")
         else:
             accusation.set_result(False)
             character = self.play_to_char[accuser_id]
             character.move_char(self.locations[0])
-            return (True, False, f"Accusation was incorrect, {character.name} ({accuser_id}) is out of the game")
+            return (True, False, f"Accusation by {self.play_to_char[accuser_id].name} ({accuser_id}) was incorrect, {character.name} ({accuser_id}) is out of the game")
         
 
     def move_character(self, character_name, location_id):
