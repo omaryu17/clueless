@@ -510,6 +510,7 @@
         socket.on("suggestion_made", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.suggester} made a suggestion: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.innerHTML += `<p>${data.suspect} was moved to the ${data.room}.</p>`;
         })
 
         socket.on("suggestion_disproved", function(data) {
@@ -519,7 +520,7 @@
 
         socket.on("start_disprove", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>You are disproving the suggestion.</p>`;
+            messageDiv.innerHTML += `<p>You are disproving the suggestion. Your choices are: ${data.choices}.</p>`;
             const disprover_id = data.disprover_id;
             // enable disproving stuff here
         })

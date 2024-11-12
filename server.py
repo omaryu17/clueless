@@ -171,14 +171,12 @@ def make_suggestion(data):
                     "suspect": suspect,
                     "room": location,
                     "room_id": room_id,
-                    "weapon": weapon,
-                    "state": loaded_game.state.to_json(),
-                    "disprover_id": res[2],
-                    "choices": json.dumps(res[3])
+                    "weapon": weapon
                 }, broadcast=True)
 
                 emit("start_disprove", {
-                    "disprover_id" : res[2]
+                    "disprover_id" : res[2],
+                    "choices" : json.dumps(res[3])
                 }, to=res[2])
             else:
                 emit("suggestion_error", {"game_id": game_id}, broadcast=True)
