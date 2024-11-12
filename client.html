@@ -244,7 +244,7 @@
         let inGame = false;
         let playerHand = null;
         // connect to server
-        const socket = io.connect("http://127.0.0.1:5000");
+        const socket = io.connect("https://clueless.onrender.com");
 
         let mySocketId = null;
         socket.on('connect', function(){
