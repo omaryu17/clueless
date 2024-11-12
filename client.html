@@ -109,21 +109,21 @@
                 <h3>Make an Suggestion</h3>
                 <select id="suggestionCharacter">
                     <option value="">Select Character</option>
-                    <option value="scarlet">Miss Scarlet</option>
-                    <option value="mustard">Col. Mustard</option>
-                    <option value="white">Mrs. White</option>
-                    <option value="green">Mr. Green</option>
-                    <option value="peacock">Mrs. Peacock</option>
-                    <option value="plum">Professor Plum</option>
+                    <option value="Miss Scarlet">Miss Scarlet</option>
+                    <option value="Col. Mustard">Col. Mustard</option>
+                    <option value="Mrs. White">Mrs. White</option>
+                    <option value="Mr. Green">Mr. Green</option>
+                    <option value="Mrs. Peacock">Mrs. Peacock</option>
+                    <option value="Professor Plum">Professor Plum</option>
                 </select>
                 <select id="suggestionWeapon">
                     <option value="">Select Weapon</option>
-                    <option value="candlestick">Candlestick</option>
-                    <option value="dagger">Dagger</option>
-                    <option value="leadPipe">Lead Pipe</option>
-                    <option value="revolver">Revolver</option>
-                    <option value="rope">Rope</option>
-                    <option value="wrench">Wrench</option>
+                    <option value="Candlestick">Candlestick</option>
+                    <option value="Dagger">Dagger</option>
+                    <option value="Lead pipe">Lead Pipe</option>
+                    <option value="Revolver">Revolver</option>
+                    <option value="Rope">Rope</option>
+                    <option value="Wrench">Wrench</option>
                 </select>
                 <select id="suggestionRoom">
                     <option value="">Select Room</option>
@@ -144,21 +144,22 @@
                 <h3>Make an Accusation</h3>
                 <select id="accusationCharacter">
                     <option value="">Select Character</option>
-                    <option value="scarlet">Miss Scarlet</option>
-                    <option value="mustard">Col. Mustard</option>
-                    <option value="white">Mrs. White</option>
-                    <option value="green">Mr. Green</option>
-                    <option value="peacock">Mrs. Peacock</option>
-                    <option value="plum">Professor Plum</option>
+                    <option value="Miss Scarlet">Miss Scarlet</option>
+                    <option value="Col. Mustard">Col. Mustard</option>
+                    <option value="Mrs. White">Mrs. White</option>
+                    <option value="Mr. Green">Mr. Green</option>
+                    <option value="Mrs. Peacock">Mrs. Peacock</option>
+                    <option value="Professor Plum">Professor Plum</option>
+                </select>
                 </select>
                 <select id="accusationWeapon">
                     <option value="">Select Weapon</option>
-                    <option value="candlestick">Candlestick</option>
-                    <option value="dagger">Dagger</option>
-                    <option value="leadPipe">Lead Pipe</option>
-                    <option value="revolver">Revolver</option>
-                    <option value="rope">Rope</option>
-                    <option value="wrench">Wrench</option>
+                    <option value="Candlestick">Candlestick</option>
+                    <option value="Dagger">Dagger</option>
+                    <option value="Lead pipe">Lead Pipe</option>
+                    <option value="Revolver">Revolver</option>
+                    <option value="Rope">Rope</option>
+                    <option value="Wrench">Wrench</option>
                 </select>
                 <select id="accusationRoom">
                     <option value="">Select Room</option>
@@ -483,14 +484,14 @@
                 alert('!!! Choose a card !!!');
                 return;
             }
-            socket.emit('disprove', {card: card});
+            socket.emit("disprove_suggestion", {game_id: document.getElementById("gameID").value, card : card});
             document.getElementById("disproveDropdown").style.display = 'none';
             // need to add checks with server to check for result and request 
         }
 
         socket.on("player_moved", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.player_id} moved to ${data.location} (${data.location_id})</p>`;
+            messageDiv.innerHTML += `<p>${data.character} (${data.player_id}) moved to ${data.location} (${data.location_id})</p>`;
         })
 
         socket.on("player_move_error", function(data) {
@@ -521,6 +522,7 @@
         socket.on("suggestion_made", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.suggester} made a suggestion: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.innerHTML += `<p>${data.suspect} was moved to the ${data.room}.</p>`;
         })
 
         socket.on("suggestion_disproved", function(data) {
@@ -528,14 +530,22 @@
             messageDiv.innerHTML += `<p>Suggestion was disproved by ${data.disprover}.</p>`;
         })
 
+        socket.on("start_disprove", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>You are disproving the suggestion. Your choices are: ${data.choices}.</p>`;
+            const disprover_id = data.disprover_id;
+            // enable disproving stuff here
+        })
+
         socket.on("disprover_msg", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.card}</p>`;
         })
 
-        socket.on("correct_acc", function(data) {
+        socket.on("acc_res", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>GAME OVER: ${data.accuser} made the correct accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.innerHTML += `<p>${data.message}</p>`;
+            //messageDiv.innerHTML += `<p>GAME OVER: ${data.accuser} made the correct accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
         })
 
         socket.on("false_acc", function(data) {

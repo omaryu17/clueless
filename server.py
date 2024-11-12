@@ -131,13 +131,14 @@ def move_player(data):
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.move_player(player_id, int(location_id))
+            location = loaded_game.state.locations[int(location_id)].location_name
             print(f"RES: {res}")
             if res[0]:
                 print(res[1])
-                location = loaded_game.state.locations[int(location_id)].location_name
                 emit("player_moved", {
                     "game_id": game_id,
                     "player_id": player_id,
+                    "character": loaded_game.state.play_to_char[player_id].name,
                     "location": location,
                     "location_id": location_id,
                     "state": loaded_game.state.to_json()
@@ -154,11 +155,12 @@ def make_suggestion(data):
         player_id = request.sid
         game_id = data.get("game_id")
         suspect = data.get("suspect")
-        room_id = data.get("room_id")
+        room_id = int(data.get("room_id"))
         weapon = data.get("weapon")
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.make_suggestion(player_id, suspect, room_id, weapon)
+            location = loaded_game.state.locations[int(room_id)].location_name
             if res[0]:
                 # res[1] -> msg
                 # res[2] -> disprover_id
@@ -167,12 +169,15 @@ def make_suggestion(data):
                     "game_id": game_id,
                     "suggester": player_id,
                     "suspect": suspect,
+                    "room": location,
                     "room_id": room_id,
-                    "weapon": weapon,
-                    "state": loaded_game.state.to_json(),
-                    "disprover_id": res[2],
-                    "choices": json.dumps(res[3])
+                    "weapon": weapon
                 }, broadcast=True)
+
+                emit("start_disprove", {
+                    "disprover_id" : res[2],
+                    "choices" : json.dumps(res[3])
+                }, to=res[2])
             else:
                 emit("suggestion_error", {"game_id": game_id}, broadcast=True)
         else:
@@ -213,30 +218,31 @@ def make_accusation(data):
         player_id = request.sid
         game_id = data.get("game_id")
         suspect = data.get("suspect")
-        room_id = data.get("room_id")
+        room_id = int(data.get("room_id"))
         weapon = data.get("weapon")
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.make_accusation(player_id, suspect, room_id, weapon)
             if res[0]:
-                print(res[1])
-                emit("correct_acc", {
+                # split into cases where res[1] is true or false
+                emit("acc_res", {
                     "game_id": game_id,
+                    "message" : res[2],
                     "accuser": player_id,
                     "suspect": suspect,
                     "room_id": room_id,
                     "weapon": weapon,
                     "state": loaded_game.state.to_json()
                 }, broadcast=True)
-            else:
-                emit("false_acc", {
-                    "game_id": game_id,
-                    "accuser": player_id,
-                    "suspect": suspect,
-                    "room_id": room_id,
-                    "weapon": weapon,
-                    "state": loaded_game.state.to_json()
-                }, broadcast=True)                    
+            # else:
+            #     emit("false_acc", {
+            #         "game_id": game_id,
+            #         "accuser": player_id,
+            #         "suspect": suspect,
+            #         "room_id": room_id,
+            #         "weapon": weapon,
+            #         "state": loaded_game.state.to_json()
+            #     }, broadcast=True)                    
         else:
             emit("Could not load game", {"game_id": game_id}, broadcast=True)
 
@@ -251,7 +257,6 @@ def end_turn(data):
             emit("turn_ended", {
                 "message": res[1]
             }, broadcast=True)
-
 
 
 # Event to load a game by ID from the database
