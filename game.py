@@ -1,35 +1,85 @@
 from gamestate import GameState
 from models import GameModel, db
+import json
 
 class Game():
-    count = 0
+    count = 1
     # TODO: FIGURE OUT WHAT OTHER CLASS VARIABLES WE NEED
 
-    def __init__(self, num_players, status):
+    def __init__(self, player_ids, num_players, status):
         self.id = self.count
+        self.player_ids = player_ids
         self.num_players = num_players
         self.status = status
-        self.state = GameState(num_players)
-        # TODO: FIGURE OUT WHAT OTHER INSTANCE VARIABLES WE NEED
+        self.state = GameState(self.id, self.player_ids, self.num_players, self.status)
         self.count += 1
 
-    def move_player_to_hallway(self, player_id, hallway):
-        # Update the player's hallway in the game state
-        self.state.locations[player_id]["hallway"] = hallway
 
-        # Save the updated state to the database
+    def start_game(self):
+        # players is a mapping from client_id to something
+        started, msg = self.state.start_game()
         self.save_to_db()
+        return (started, msg)
 
-    def get_player_hallway(self, player_id):
-        # Return the current hallway of the player
-        if player_id in self.state.locations:
-            return self.state.locations[player_id].get("hallway", "unknown")
-        else:
-            return "unknown"
+        # send message representing each player
+        # needs to contain character, location, and cards 
+
+    def end_game(self):
+        print("Accusation was correct, game over")
+
+    def move_player(self, player_id, location_id):
+        moved, msg = self.state.move_player(player_id, location_id)
+        self.save_to_db()
+        return (moved, msg)
+
+    #  not needed, exists as logic within make suggestion
+    def move_character(self, character_name, location_id):
+        moved, msg = self.state.move_character(character_name, location_id)
+        self.save_to_db()
+        return (moved, msg)
+
+    def make_suggestion(self, suggester, suspect, room_id, weapon):
+        res = self.state.make_suggestion(suggester, suspect, room_id, weapon)
+        self.save_to_db()
+        if res[0]:
+            # allow for disprovals
+            msg = res[1]
+            disprover_id = res[2]
+            choices = res[3]
+            return (res[0], msg, disprover_id, choices)
+        return (res[0], res[1])
+
+    def disprove_suggestion(self, disprover, card):
+        res = self.state.disprove_suggestion(disprover, card)
+        self.save_to_db()
+        return res
+
+    def make_accusation(self, accuser, suspect, room, weapon):
+        res, passed, msg = self.state.make_accusation(accuser, suspect, room, weapon)
+        self.save_to_db()
+        if res and passed and self.state.status == "OVER":
+            self.end_game()
+            return (res, passed, msg)
+        elif res and not passed:
+            return (res, passed, msg)
+        return res, msg
+
+    def end_turn(self):
+        turn, msg = self.state.advance_turn()
+        self.save_to_db()
+        return (turn, f"It is now {msg}'s turn")
+            
 
     def save_to_db(self):
-        model = GameModel(self.num_players, self.status, self.state.to_json())
-        db.session.add(model)
+        model = GameModel.query.get(self.id) if self.id else None
+        if model:
+            model.player_ids = json.dumps(self.player_ids)
+            model.num_players = self.num_players
+            model.status = self.status
+            model.state = self.state.to_json()
+        else:
+            model = GameModel(self.id, json.dumps(self.player_ids), self.num_players, self.status, self.state.to_json())
+            db.session.add(model)
         db.session.commit()
         self.id = model.id
         print(f"Game saved with id {self.id}")
@@ -39,18 +89,13 @@ class Game():
         model = GameModel.query.get(id)
         if model:
             self.id = model.id
+            self.player_ids = json.loads(model.player_ids)
             self.num_players = model.num_players
             self.status = model.status
-            self.state = GameState(self.num_players)
+            self.state = GameState(-1, self.player_ids, self.num_players, self.status)
             self.state.from_json(model.state)
             print(f"Game loaded with id {self.id}")
             return True
         else:
             print(f"Failed to load game with id {id}")
             return False
-
-
-    # TODO: ADD OTHER METHODS
-
-
-    # movement, accusation, suggestion, disprove

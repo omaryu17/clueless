@@ -1,24 +1,21 @@
+from card import Card
+
 class Player():
 
-    def __init__(self, player_id, name, character_name):
+    def __init__(self, player_id, character, status):
         self.player_id = player_id
-        self.player_name = name
-        self.clue_character_name = character_name
+        self.character = character
+        self.status = status
         self.hand = []
-        self.current_position = None
-        # TODO: self.set_initial_position() based on character name
-        self.status = True
         self.turn = False
+        self.disproved_cards = []
 
     def add_card(self, card):
         """Add Card to hand"""
         self.hand.append(card)
 
     def get_character_name(self):
-        return self.clue_character_name
-    
-    def move_to(self, location):
-        self.current_position = location
+        return self.character
 
     def get_position(self):
         return self.current_position
@@ -30,9 +27,26 @@ class Player():
         return self.turn
     
     def set_inactive(self):
-        self.status = False
+        self.status = "OUT"
     
     def __repr__(self):
-        return f"Player(id={self.player_id}, name='{self.player_name}', character={self.clue_character_name})"
+        return f"Player(id={self.player_id}, character={self.character}, status={self.status}, hand={self.hand}, turn={self.turn}, disproved_cards={self.disproved_cards})"
     
-    # def make_suggestion()
+    def to_dict(self):
+        return {
+            'player_id': self.player_id,
+            'character': self.character,
+            'status': self.status,
+            'hand': [card.to_str() for card in self.hand],
+            'turn': self.turn,
+            'disproved_cards': self.disproved_cards
+        }
+    
+    @classmethod
+    def from_dict(cls, data):
+        player = cls(data['player_id'], data['character'], data['status'])
+        player.hand = [Card.from_str(card) for card in data['hand']]
+        player.turn = data['turn']
+        player.disproved_cards = data['disproved_cards']
+        return player
+
