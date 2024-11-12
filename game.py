@@ -55,12 +55,14 @@ class Game():
         return res
 
     def make_accusation(self, accuser, suspect, room, weapon):
-        res, msg = self.state.make_accusation(accuser, suspect, room, weapon)
+        res, passed, msg = self.state.make_accusation(accuser, suspect, room, weapon)
         self.save_to_db()
-        if res and self.state.status == "OVER":
+        if res and passed and self.state.status == "OVER":
             self.end_game()
-            return (res, msg)
-        return res
+            return (res, passed, msg)
+        elif res and not passed:
+            return (res, passed, msg)
+        return res, msg
 
     def end_turn(self):
         turn, msg = self.state.advance_turn()

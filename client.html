@@ -522,9 +522,10 @@
             messageDiv.innerHTML += `<p>${data.card}</p>`;
         })
 
-        socket.on("correct_acc", function(data) {
+        socket.on("acc_res", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>GAME OVER: ${data.accuser} made the correct accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.innerHTML += `<p>${data.message}</p>`;
+            //messageDiv.innerHTML += `<p>GAME OVER: ${data.accuser} made the correct accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
         })
 
         socket.on("false_acc", function(data) {

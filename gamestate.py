@@ -74,6 +74,7 @@ class GameState():
         self.suggestions.append(suggestion)
         
         # move suspect to room
+        print(self.name_to_char)
         suspect_char = self.name_to_char[suspect_name]
         suspect_char.move_char(room) # need error handling maybe, but should only expect that client sends valid message
         # move weapon if we want
@@ -106,12 +107,12 @@ class GameState():
         if res:
             accusation.set_result(True)
             self.status = "OVER"
-            return (True, "Accusation was correct, game over")
+            return (True, True, "Accusation was correct, game over")
         else:
             accusation.set_result(False)
             character = self.play_to_char[accuser_id]
             character.move_char(self.locations[0])
-            return (True, "Accusation was incorrect, player is out of the game")
+            return (True, False, f"Accusation was incorrect, {character.name} ({accuser_id}) is out of the game")
         
 
     def move_character(self, character_name, location_id):
@@ -299,8 +300,10 @@ class GameState():
         for character in self.characters:
             for player in self.players:
                 if character.name == player.character:
-                    self.name_to_char[character.name] = character
                     self.char_to_play[character.name] = player
+        
+        for character in self.characters:
+            self.name_to_char[character.name] = character
         
         self.play_to_char = {}
         for player in self.players:

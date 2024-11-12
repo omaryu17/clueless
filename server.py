@@ -160,6 +160,7 @@ def make_suggestion(data):
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.make_suggestion(player_id, suspect, room_id, weapon)
+            location = loaded_game.state.locations[int(room_id)].location_name
             if res[0]:
                 # res[1] -> msg
                 # res[2] -> disprover_id
@@ -168,6 +169,7 @@ def make_suggestion(data):
                     "game_id": game_id,
                     "suggester": player_id,
                     "suspect": suspect,
+                    "room": location,
                     "room_id": room_id,
                     "weapon": weapon,
                     "state": loaded_game.state.to_json(),
@@ -220,24 +222,25 @@ def make_accusation(data):
         if loaded_game:
             res = loaded_game.make_accusation(player_id, suspect, room_id, weapon)
             if res[0]:
-                print(res[1])
-                emit("correct_acc", {
+                # split into cases where res[1] is true or false
+                emit("acc_res", {
                     "game_id": game_id,
+                    "message" : res[2],
                     "accuser": player_id,
                     "suspect": suspect,
                     "room_id": room_id,
                     "weapon": weapon,
                     "state": loaded_game.state.to_json()
                 }, broadcast=True)
-            else:
-                emit("false_acc", {
-                    "game_id": game_id,
-                    "accuser": player_id,
-                    "suspect": suspect,
-                    "room_id": room_id,
-                    "weapon": weapon,
-                    "state": loaded_game.state.to_json()
-                }, broadcast=True)                    
+            # else:
+            #     emit("false_acc", {
+            #         "game_id": game_id,
+            #         "accuser": player_id,
+            #         "suspect": suspect,
+            #         "room_id": room_id,
+            #         "weapon": weapon,
+            #         "state": loaded_game.state.to_json()
+            #     }, broadcast=True)                    
         else:
             emit("Could not load game", {"game_id": game_id}, broadcast=True)
 
