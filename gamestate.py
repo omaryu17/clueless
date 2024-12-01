@@ -217,7 +217,13 @@ class GameState():
         if player.status != "OUT":
             moves.append("ACCUSE")
         return moves    
+    
+    def get_valid_locations(self, player_id):
+        """Get valid locations for current player"""
+        character = self.play_to_char[player_id]
+        valid_locs = character.get_valid_locations()
 
+        return valid_locs
 
     def get_turn(self):
         return self.turn_order[self.turn_index]

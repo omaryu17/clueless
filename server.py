@@ -299,6 +299,18 @@ def get_game(data):
 
 # TODO: ADD MORE MESSAGE HANDLERS FOR SPECIFIC ACTIONS
 
+@socketio.on("get_valid_locations")
+def get_valid_locations(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.get_valid_locations(player_id)
+            emit("valid_locs", {"game_id": game_id,"player_id": player_id, "valid_locs": res}, to=player_id)
+        else:
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
 def load_from_db(game_id):
     loaded_game = Game(None, 0, "null")
     loaded = loaded_game.load_from_db(game_id)

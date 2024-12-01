@@ -22,6 +22,7 @@ class Character():
 
         # otherwise, player can move to any connected location
         if target_location.is_accessible() and (target_location.location_id in self.location.connected_hallways or target_location.location_id in self.location.connected_rooms):
+            # TODO: you can have more than one player in room, but not hallway
             self.location.set_occupied()
             self.location = target_location
             self.location.set_occupied()
@@ -34,6 +35,17 @@ class Character():
             self.location = target_location
             return True
         return False
+    
+    def get_valid_locations(self):
+        locations = []
+        if self.location:
+            hallways = self.location.connected_hallways
+            rooms = self.location.connected_rooms
+            locations = hallways + rooms
+        else:
+            locations = [self.starting_location.location_id]
+
+        return locations
 
 
     def __repr__(self):
