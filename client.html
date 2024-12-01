@@ -55,10 +55,20 @@
                 font-weight: 400;
                 font-style: normal;
             }
+            button:disabled {
+                background-color: #ccc; 
+                color: #666; 
+                border: 1px solid #999; 
+            }
             button:hover {
                 opacity: 0.8; 
                 background-color: #ffb3bc; 
                 color: black;
+            }
+            button:disabled:hover {
+                background-color: #ccc; 
+                color: #666; 
+                border: 1px solid #999;
             }
             #messages {
                 height: 200px;
@@ -86,9 +96,8 @@
             </div>
             <div id="createGame">
                 <input type="number" id="numPlayersInput" placeholder="Number of Players">
-                <input type="text" id="statusInput" placeholder="Game Status">
+                <input type="text" id="gameID" hidden>
                 <button onclick="createGame()">Create Game</button>
-                <input type="number" id="gameID" placeholder="Game ID">
                 <!-- <button onclick="getGame()">Load Game</button> -->
             </div>
             <div id="makinmoves">
@@ -98,10 +107,9 @@
                 <option value="accusation">Make a Accusation</option>
                 <option value="moveToLocation">Move to a Location</option>
                 <option value="showCards">Show Cards</option>
-                <option value="secPass">Use Secret Passage</option>
                 <!-- <option value="endTurn">End Turn</option> -->
                 </select>
-                <button onclick="chooseMove()">Choose Move</button>
+                <button id="chooseMoveButton" onclick="chooseMove()">Choose Move</button>
             </div>
             
 
@@ -201,16 +209,14 @@
             </div>
             <div id="endTurn">
                 <!-- need to implement the end turn fucntion -->
-                <button onclick="endTurn()">End Turn</button> 
+                <button id="endTurnButton" onclick="endTurn()">End Turn</button> 
             </div>
 
-            <div id="disprove">
-                <button onclick="disprove()">Disprove Player</button>
+            <div id="disprove" style="display: none;">
                 <select id="disproveDropdown">
                     <option value = ""> Select a card to show </option>
-                    <!-- tbd -->
                 </select>
-                <button onclick="disproveCard()">Show Card</button>
+                <button onclick="disproveCard()">Disprove Card</button>
             </div>
             
         </div>
@@ -224,7 +230,7 @@
         let inGame = false;
         let playerHand = null;
         // connect to server
-        const socket = io.connect("https://clueless.onrender.com/");
+        const socket = io.connect("http://127.0.0.1:5000");
 
         let mySocketId = null;
         socket.on('connect', function(){
@@ -277,7 +283,7 @@
             document.getElementById("gameID").value = data.id;
             messageDiv.innerHTML += `<p>Player-Character mappings: ${data.players}</p>`;
             messageDiv.innerHTML += `<p>Your player id is ${mySocketId}</p>`;
-            hideCreateGame();
+            hideCreateGame()
         });
 
         // Listen for game loaded broadcast
@@ -293,20 +299,13 @@
             messageDiv.innerHTML += `<p>Game with ID= ${data.id} could not be loaded</p>`;
         });
 
-        // Listen for game loaded broadcast
-        socket.on('game_loaded_error', function(data) {
-            const messageDiv = document.getElementById('messages');
-            messageDiv.innerHTML += `<p>Game with ID= ${data.id} could not be loaded</p>`;
-        });
-
         // Send create_game event to server
         function createGame() {
             const numPlayers = document.getElementById('numPlayersInput').value;
-            const status = document.getElementById('statusInput').value;
+            const status = "Running";
             socket.emit('create_game', { num_players: numPlayers, status: status });
             document.getElementById("numPlayersInput").value = "";
-            document.getElementById("statusInput").value = "";
-            // hideCreateGame();
+            hideCreateGame();
         }
 
         // Send get_game event to server
@@ -320,7 +319,6 @@
         // Once the game is created - the create game & status buttons are not shown 
         function hideCreateGame(){
             document.getElementById("numPlayersInput").style.display = 'none';
-            document.getElementById("statusInput").style.display = 'none';
             //document.getElementById("gameIdInput").style.display = 'none';
             document.querySelector('button[onclick="createGame()"]').style.display = 'none';
             document.querySelector('button[onclick="getGame()"]').style.display = 'none';
@@ -345,12 +343,6 @@
                     break;
                 case 'showCards':
                     socket.emit('show_cards', {/*tbd*/});
-                    break;
-                case 'secPass':
-                    socket.emit('sec_pass', {/*tbd*/});
-                    break;
-                case 'endTurn':
-                    socket.emit('end_turn', {/*tbd*/});
                     break;
             }
             document.getElementById('moves').value = '';
@@ -466,7 +458,7 @@
                 return;
             }
             socket.emit("disprove_suggestion", {game_id: document.getElementById("gameID").value, card : card});
-            document.getElementById("disproveDropdown").style.display = 'none';
+            document.getElementById("disprove").style.display = 'none';
             // need to add checks with server to check for result and request 
         }
 
@@ -510,6 +502,24 @@
                 });
         }
 
+        // enable movement when it's the player's turn
+        function updateTurnStatus(isPlayerTurn) {
+            const chooseMoveButton = document.getElementById("chooseMoveButton");
+
+            if (isPlayerTurn) {
+                chooseMoveButton.disabled = false; // Enable button
+                chooseMoveButton.style.cursor = "pointer"; // Change cursor to pointer
+                endTurnButton.disabled = false; // Enable button
+                endTurnButton.style.cursor = "pointer"; // Change cursor to pointer
+            } else {
+                chooseMoveButton.disabled = true; // Disable button
+                chooseMoveButton.style.cursor = "not-allowed"; // Change cursor to not-allowed
+                endTurnButton.disabled = true; // Enable button
+                endTurnButton.style.cursor = "not-allowed"; // Change cursor to pointer
+            }
+        }
+
+
         socket.on("player_moved", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.character} (${data.player_id}) moved to ${data.location} (${data.location_id})</p>`;
@@ -526,6 +536,7 @@
             messageDiv.innerHTML += `<p> You are ${data.character}</p>`;
             messageDiv.innerHTML += `<p>Your first move will be ${data.start}</p>`;
             messageDiv.innerHTML += `<p>Your hand is ${data.hand}</p>`;
+            updateTurnStatus(data.is_turn);
             //playerHand = data.hand;
             // addDisproveCards(data.hand);
 
@@ -542,6 +553,9 @@
         socket.on("turn_ended", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.message}</p>`;
+            const currentTurnId = data.player_id;
+            const isTurn = (mySocketId === currentTurnId); 
+            updateTurnStatus(isTurn); // Enable or disable the button
         })
 
         socket.on("suggestion_made", function(data) {
@@ -560,6 +574,7 @@
             messageDiv.innerHTML += `<p>You are disproving the suggestion. Your choices are: ${data.choices}.</p>`;
             const disprover_id = data.disprover_id;
             // enable disproving stuff here
+            document.getElementById('disprove').style.display = 'block'; 
             const disproveDropdown = document.getElementById('disproveDropdown');
             disproveDropdown.innerHTML = '<option value="">Select a card to show</option>';
             

@@ -115,6 +115,7 @@ def create_game(data):
                     "response": f"It is {play_to_chars[player].name} ({player})'s turn."
                 }, broadcast=True)
             emit("player_start", {
+                "is_turn": play_obj.turn,
                 "character": play_to_chars[player].name,
                 "start" : play_to_chars[player].starting_location.location_name,
                 "hand": json.dumps([card.name for card in play_obj.hand]),
@@ -259,7 +260,8 @@ def end_turn(data):
         if loaded_game:
             res = loaded_game.end_turn()
             emit("turn_ended", {
-                "message": res[1]
+                "message": res[1],
+                "player_id": res[0] #id of current turn
             }, broadcast=True)
 
 
