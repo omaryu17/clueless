@@ -22,7 +22,6 @@ class Character():
 
         # otherwise, player can move to any connected location
         if target_location.is_accessible() and (target_location.location_id in self.location.connected_hallways or target_location.location_id in self.location.connected_rooms):
-            # TODO: you can have more than one player in room, but not hallway
             self.location.set_occupied()
             self.location = target_location
             self.location.set_occupied()

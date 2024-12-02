@@ -283,7 +283,7 @@
             document.getElementById("gameID").value = data.id;
             messageDiv.innerHTML += `<p>Player-Character mappings: ${data.players}</p>`;
             messageDiv.innerHTML += `<p>Your player id is ${mySocketId}</p>`;
-            hideCreateGame()
+            hideCreateGame();
         });
 
         // Listen for game loaded broadcast
@@ -431,7 +431,6 @@
             // Emit move to server
             socket.emit("move_player", { game_id: document.getElementById("gameID").value, location_id: room });
 
-
             // Reset dropdowns after submission
             document.getElementById('accusationCharacter').value = '';
             document.getElementById('accusationWeapon').value = '';
@@ -460,6 +459,22 @@
             socket.emit("disprove_suggestion", {game_id: document.getElementById("gameID").value, card : card});
             document.getElementById("disprove").style.display = 'none';
             // need to add checks with server to check for result and request 
+        }
+
+        function updateMoveDropdown(validMoves) {
+            const moveDropdown = document.getElementById("moves");
+            moveDropdown.innerHTML = '<option value="">Select a move</option>';
+            const movesDict = {
+                suggestion: "Make a Suggestion",
+                accusation: "Make an Accusation",
+                moveToLocation: "Move to a Location"
+                };
+            validMoves.forEach(value => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = movesDict[value]; 
+                moveDropdown.appendChild(option);
+                });
         }
 
         function updateRoomDropdown(validIndices) {
@@ -509,13 +524,25 @@
             if (isPlayerTurn) {
                 chooseMoveButton.disabled = false; // Enable button
                 chooseMoveButton.style.cursor = "pointer"; // Change cursor to pointer
-                endTurnButton.disabled = false; // Enable button
-                endTurnButton.style.cursor = "pointer"; // Change cursor to pointer
+                endTurnButton.disabled = false;
+                endTurnButton.style.cursor = "pointer"; 
+                getValidMoves();
+                validEndTurn();
             } else {
                 chooseMoveButton.disabled = true; // Disable button
                 chooseMoveButton.style.cursor = "not-allowed"; // Change cursor to not-allowed
-                endTurnButton.disabled = true; // Enable button
-                endTurnButton.style.cursor = "not-allowed"; // Change cursor to pointer
+                endTurnButton.disabled = true; 
+                endTurnButton.style.cursor = "not-allowed"; 
+            }
+        }
+
+        function enableEndTurn(validEndTurn) {
+            if (validEndTurn) {
+                endTurnButton.disabled = false; // Enable button
+                endTurnButton.style.cursor = "pointer"; // Change cursor to pointer
+            } else {
+                endTurnButton.disabled = true; 
+                endTurnButton.style.cursor = "not-allowed"; 
             }
         }
 
@@ -523,6 +550,8 @@
         socket.on("player_moved", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.character} (${data.player_id}) moved to ${data.location} (${data.location_id})</p>`;
+            getValidMoves();
+            validEndTurn();
         })
 
         socket.on("player_move_error", function(data) {
@@ -536,6 +565,8 @@
             messageDiv.innerHTML += `<p> You are ${data.character}</p>`;
             messageDiv.innerHTML += `<p>Your first move will be ${data.start}</p>`;
             messageDiv.innerHTML += `<p>Your hand is ${data.hand}</p>`;
+            getValidMoves();
+            validEndTurn();
             updateTurnStatus(data.is_turn);
             //playerHand = data.hand;
             // addDisproveCards(data.hand);
@@ -544,6 +575,14 @@
 
         function getValidLocations(gameId) {
             socket.emit("get_valid_locations", {game_id: document.getElementById("gameID").value});
+        }
+
+        function getValidMoves(gameId) {
+            socket.emit("get_valid_moves", {game_id: document.getElementById("gameID").value});
+        }
+
+        function validEndTurn(gameId) {
+            socket.emit("valid_end_turn", {game_id: document.getElementById("gameID").value});
         }
 
         function endTurn() {
@@ -567,6 +606,8 @@
         socket.on("suggestion_disproved", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>Suggestion was disproved by ${data.character} (${data.disprover}).</p>`;
+            getValidMoves();
+            validEndTurn();
         })
 
         socket.on("start_disprove", function(data) {
@@ -589,6 +630,13 @@
             });
         })
 
+        socket.on("no_disprove", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>Suggestion could not be disproved.</p>`;
+            getValidMoves();
+            validEndTurn();
+        })
+
         socket.on("disprover_msg", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.card}</p>`;
@@ -608,6 +656,16 @@
         socket.on('valid_locs', function(data) {
             valid_locs = data.valid_locs
             updateRoomDropdown(valid_locs);
+        })
+
+        socket.on('valid_moves', function(data) {
+            valid_moves = data.valid_moves
+            updateMoveDropdown(valid_moves);
+        })
+
+        socket.on('valid_end_turn', function(data) {
+            valid_end_turn = data.valid_end_turn
+            enableEndTurn(valid_end_turn);
         })
 
 
