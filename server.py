@@ -115,6 +115,7 @@ def create_game(data):
                     "response": f"It is {play_to_chars[player].name} ({player})'s turn."
                 }, broadcast=True)
             emit("player_start", {
+                "is_turn": play_obj.turn,
                 "character": play_to_chars[player].name,
                 "start" : play_to_chars[player].starting_location.location_name,
                 "hand": json.dumps([card.name for card in play_obj.hand]),
@@ -176,10 +177,16 @@ def make_suggestion(data):
                     "weapon": weapon
                 }, broadcast=True)
 
-                emit("start_disprove", {
-                    "disprover_id" : res[2],
-                    "choices" : json.dumps(res[3])
-                }, to=res[2])
+                if res[2]:
+                    emit("start_disprove", {
+                        "disprover_id" : res[2],
+                        "choices" : json.dumps(res[3])
+                    }, to=res[2])
+                else: 
+                    emit('no_disprove',
+                         {"game_id": game_id},
+                         broadcast=True)
+
             else:
                 emit("suggestion_error", {"game_id": game_id}, broadcast=True)
         else:
@@ -259,7 +266,8 @@ def end_turn(data):
         if loaded_game:
             res = loaded_game.end_turn()
             emit("turn_ended", {
-                "message": res[1]
+                "message": res[1],
+                "player_id": res[0], #id of current turn
             }, broadcast=True)
 
 
@@ -298,6 +306,43 @@ def get_game(data):
             # }, broadcast=True)
 
 # TODO: ADD MORE MESSAGE HANDLERS FOR SPECIFIC ACTIONS
+
+@socketio.on("get_valid_locations")
+def get_valid_locations(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.get_valid_locations(player_id)
+            emit("valid_locs", {"game_id": game_id,"player_id": player_id, "valid_locs": res}, to=player_id)
+        else:
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
+@socketio.on("get_valid_moves")
+def get_valid_moves(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.get_valid_moves(player_id)
+            emit("valid_moves", {"game_id": game_id,"player_id": player_id, "valid_moves": res}, to=player_id)
+        else:
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
+@socketio.on("valid_end_turn")
+def valid_end_turn(data):
+    with app.app_context():
+        player_id = request.sid
+        game_id = data.get("game_id")
+        loaded_game = load_from_db(game_id)
+        if loaded_game:
+            res = loaded_game.valid_end_turn(player_id)
+            emit("valid_end_turn", {"game_id": game_id,"player_id": player_id, "valid_end_turn": res}, to=player_id)
+        else:
+            emit("Could not load game", {"game_id": game_id}, broadcast=True)
+
 
 def load_from_db(game_id):
     loaded_game = Game(None, 0, "null")

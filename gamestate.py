@@ -25,6 +25,8 @@ class GameState():
         self.locations = [] # list of location objects, sorted by id
         self.turn_order = [] # list of player ids in turn order
         self.turn_index = 0   # index of player in turn order
+        self.moved = False# whether current turn has moved
+        self.made_suggestion = False # whether current turn has made suggestion
         self.suggestions = [] # list of suggestions
         self.accusations = [] # list of accusations
         self.case_file = None # becomes actual case file object after initialization
@@ -53,6 +55,7 @@ class GameState():
         #     return (False, "Player cannot move")
         moved = character.move_player(location)
         if moved:
+            self.moved = True
             return (moved, f"{character.name} moved to {location.location_name}") 
         return (moved, f"{character.name} could not move to {location.location_name}")
     
@@ -79,6 +82,7 @@ class GameState():
         suspect_char.move_char(room) # need error handling maybe, but should only expect that client sends valid message
         # move weapon if we want
         disprover_id, choices = self.get_disprover(suggestion)
+        self.made_suggestion = True
         return (True, f"Suggestion was created, disprover is {disprover_id}", disprover_id, choices)
     
 
@@ -186,11 +190,13 @@ class GameState():
         self.play_to_char[self.turn_order[0]].player.turn = True
 
     def advance_turn(self):
-        self.play_to_char[self.turn_order[self.turn_index]].turn = False
+        character = self.play_to_char[self.turn_order[self.turn_index]]
+        character.turn = False
+        self.moved, self.made_suggestion = False, False
         self.turn_index = (self.turn_index + 1) % self.num_players
         player_id = self.turn_order[self.turn_index]
         self.play_to_char[player_id].turn = True
-        return player_id, f"{self.play_to_char[player_id].name} ({player_id})" #self.get_valid_moves(player_id))
+        return player_id, f"{self.play_to_char[player_id].name} ({player_id})"
     
 
     # UNUSED AS OF NOW
@@ -208,16 +214,35 @@ class GameState():
         character = self.play_to_char[player_id]
         player = character.player
         location = character.location
-        if location.is_room:
-            moves.append("MOVE")
-            moves.append("SUGGEST")
-        else:
-            moves.append("MOVE_TO_ROOM")
 
+        if (not self.moved) and (not self.made_suggestion): 
+            # can't move after making suggestion
+            moves.append("moveToLocation")
+        if (not self.made_suggestion) and (location) and (location.is_room): 
+            moves.append("suggestion")
         if player.status != "OUT":
-            moves.append("ACCUSE")
-        return moves    
+            moves.append("accusation")
+        return moves
+    
+    def valid_end_turn(self, player_id):
+        character = self.play_to_char[player_id]
+        location = character.location
 
+        if not self.is_turn(player_id):
+            return False
+        
+        if (self.made_suggestion) or (self.moved and (not location.is_room)): 
+            # can end turn after making suggestion or moving into hallway
+            return True
+        
+        return False        
+    
+    def get_valid_locations(self, player_id):
+        """Get valid locations for current player"""
+        character = self.play_to_char[player_id]
+        valid_locs = character.get_valid_locations()
+
+        return valid_locs
 
     def get_turn(self):
         return self.turn_order[self.turn_index]
@@ -259,6 +284,8 @@ class GameState():
             "locations": [location.to_dict() for location in self.locations],
             "turn_order": self.turn_order,
             "turn_index": self.turn_index,
+            "turn_moved": self.moved, 
+            "turn_suggested": self.made_suggestion, 
             "suggestions": [suggestion.to_dict() for suggestion in self.suggestions],
             "accusations": [accusation.to_dict() for accusation in self.accusations],
             "case_file": self.case_file.to_dict() if self.case_file else None
@@ -313,6 +340,8 @@ class GameState():
 
         self.turn_order = data["turn_order"]
         self.turn_index = data["turn_index"]
+        self.moved = data["turn_moved"]
+        self.made_suggestion = data["turn_suggested"]
         self.suggestions = [Suggestion.from_dict(s) for s in data["suggestions"]]
         self.accusations = [Accusation.from_dict(a) for a in data["accusations"]]
         self.case_file = CaseFile.from_dict(data["case_file"]) if data["case_file"] else None

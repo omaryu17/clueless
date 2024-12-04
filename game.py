@@ -68,7 +68,21 @@ class Game():
         turn, msg = self.state.advance_turn()
         self.save_to_db()
         return (turn, f"It is now {msg}'s turn")
-            
+    
+    def get_valid_locations(self, player_id):
+        """Get list of rooms player can travel to"""
+        res = self.state.get_valid_locations(player_id)
+        return res           
+
+    def get_valid_moves(self, player_id):
+        """Get list of valid moves player can make"""
+        res = self.state.get_valid_moves(player_id)
+        return res 
+    
+    def valid_end_turn(self, player_id):
+        """Get whether player can end turn"""
+        res = self.state.valid_end_turn(player_id)
+        return res
 
     def save_to_db(self):
         model = GameModel.query.get(self.id) if self.id else None

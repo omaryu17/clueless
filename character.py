@@ -34,6 +34,17 @@ class Character():
             self.location = target_location
             return True
         return False
+    
+    def get_valid_locations(self):
+        locations = []
+        if self.location:
+            hallways = self.location.connected_hallways
+            rooms = self.location.connected_rooms
+            locations = hallways + rooms
+        else:
+            locations = [self.starting_location.location_id]
+
+        return locations
 
 
     def __repr__(self):
