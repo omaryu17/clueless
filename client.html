@@ -127,8 +127,8 @@
                 <select id="suggestionWeapon">
                     <option value="">Select Weapon</option>
                     <option value="Candlestick">Candlestick</option>
-                    <option value="Dagger">Dagger</option>
-                    <option value="Lead pipe">Lead Pipe</option>
+                    <option value="Knife">Knife</option>
+                    <option value="Lead Pipe">Lead Pipe</option>
                     <option value="Revolver">Revolver</option>
                     <option value="Rope">Rope</option>
                     <option value="Wrench">Wrench</option>
@@ -163,8 +163,8 @@
                 <select id="accusationWeapon">
                     <option value="">Select Weapon</option>
                     <option value="Candlestick">Candlestick</option>
-                    <option value="Dagger">Dagger</option>
-                    <option value="Lead pipe">Lead Pipe</option>
+                    <option value="Knife">Knife</option>
+                    <option value="Lead Pipe">Lead Pipe</option>
                     <option value="Revolver">Revolver</option>
                     <option value="Rope">Rope</option>
                     <option value="Wrench">Wrench</option>
@@ -241,6 +241,7 @@
         socket.on("server_broadcast", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += "<p>" + data.response + "</p>";
+            messageDiv.scrollTop = messageDiv.scrollHeight;
         });
 
         // send message to server, which gets broadcasted to all clients
@@ -283,6 +284,7 @@
             document.getElementById("gameID").value = data.id;
             messageDiv.innerHTML += `<p>Player-Character mappings: ${data.players}</p>`;
             messageDiv.innerHTML += `<p>Your player id is ${mySocketId}</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             hideCreateGame();
         });
 
@@ -290,6 +292,7 @@
         socket.on('game_loaded', function(data) {
             const messageDiv = document.getElementById('messages');
             messageDiv.innerHTML += `<p>Game Loaded: ID= ${data.id}, Num Players= ${data.num_players}, Status= ${data.status}</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             hideCreateGame();
         });
 
@@ -297,6 +300,7 @@
         socket.on('game_loaded_error', function(data) {
             const messageDiv = document.getElementById('messages');
             messageDiv.innerHTML += `<p>Game with ID= ${data.id} could not be loaded</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
         });
 
         // Send create_game event to server
@@ -327,7 +331,7 @@
         function chooseMove(){
             const move = document.getElementById('moves').value;
             if(!move){
-                alert('!!! Please make a move !!!');
+                alert('!!! Please choose an action !!!');
                 return;
             }
             switch(move){
@@ -370,7 +374,7 @@
                 weapon : weapon
             });
 
-            alert(`Suggestion made: ${character} with the ${weapon} in the ${room}.`);
+            // alert(`Suggestion made: ${character} with the ${weapon} in the ${room}.`);
 
             // Reset dropdowns after submission
             document.getElementById('suggestionCharacter').value = '';
@@ -404,7 +408,7 @@
                 weapon: weapon
             });
 
-            alert(`Accusation made: ${character} did it with the ${weapon} in the ${room}.`);
+            // alert(`Accusation made: ${character} did it with the ${weapon} in the ${room}.`);
 
             // Reset dropdowns after submission
             document.getElementById('accusationCharacter').value = '';
@@ -426,7 +430,7 @@
                 document.getElementById('roomSelec').style.display = 'none';
                 // return;
             }
-            alert(`Move to room: ${room}.`);
+            // alert(`Move to room: ${room}.`);
 
             // Emit move to server
             socket.emit("move_player", { game_id: document.getElementById("gameID").value, location_id: room });
@@ -549,22 +553,24 @@
 
         socket.on("player_moved", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.character} (${data.player_id}) moved to ${data.location} (${data.location_id})</p>`;
+            messageDiv.innerHTML += `<p>${data.character} (${data.player_id}) moved to ${data.location}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             getValidMoves();
             validEndTurn();
         })
 
         socket.on("player_move_error", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.player_id} could not move to ${data.location} (${data.location_id})</p>`;
+            messageDiv.innerHTML += `<p>${data.player_id} could not move to ${data.location}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
         })
 
         socket.on("player_start", function(data) {
             const messageDiv = document.getElementById("messages");
             // const disproveHands = document.getElementById("disproveDropdown");
-            messageDiv.innerHTML += `<p> You are ${data.character}</p>`;
-            messageDiv.innerHTML += `<p>Your first move will be ${data.start}</p>`;
-            messageDiv.innerHTML += `<p>Your hand is ${data.hand}</p>`;
+            messageDiv.innerHTML += `<p> You are ${data.character}.</p>`;
+            messageDiv.innerHTML += `<p>Your hand is ${data.hand}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             getValidMoves();
             validEndTurn();
             updateTurnStatus(data.is_turn);
@@ -591,7 +597,8 @@
 
         socket.on("turn_ended", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.message}</p>`;
+            messageDiv.innerHTML += `<p>${data.message}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             const currentTurnId = data.player_id;
             const isTurn = (mySocketId === currentTurnId); 
             updateTurnStatus(isTurn); // Enable or disable the button
@@ -601,11 +608,19 @@
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>${data.character} (${data.suggester}) made a suggestion: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
             messageDiv.innerHTML += `<p>${data.suspect} was moved to the ${data.room}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
+        })
+
+        socket.on("suggestion_error", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>${data.message}. Please retry and make a valid suggestion.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
         })
 
         socket.on("suggestion_disproved", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>Suggestion was disproved by ${data.character} (${data.disprover}).</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             getValidMoves();
             validEndTurn();
         })
@@ -613,6 +628,7 @@
         socket.on("start_disprove", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>You are disproving the suggestion. Your choices are: ${data.choices}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             const disprover_id = data.disprover_id;
             // enable disproving stuff here
             document.getElementById('disprove').style.display = 'block'; 
@@ -633,24 +649,44 @@
         socket.on("no_disprove", function(data) {
             const messageDiv = document.getElementById("messages");
             messageDiv.innerHTML += `<p>Suggestion could not be disproved.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
             getValidMoves();
             validEndTurn();
         })
 
         socket.on("disprover_msg", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.card}</p>`;
+            messageDiv.innerHTML += `<p>${data.card}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
         })
 
-        socket.on("acc_res", function(data) {
+        socket.on("correct_acc", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.message}</p>`;
-            //messageDiv.innerHTML += `<p>GAME OVER: ${data.accuser} made the correct accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            //messageDiv.innerHTML += `<p>${data.message}</p>`;
+            messageDiv.innerHTML += `<p>GAME OVER: ${data.character} (${data.accuser}) made the correct accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
+            chooseMoveButton.disabled = true; // Disable button
+            chooseMoveButton.style.cursor = "not-allowed"; // Change cursor to not-allowed
+            endTurnButton.disabled = true; 
+            endTurnButton.style.cursor = "not-allowed"; 
         })
 
         socket.on("false_acc", function(data) {
             const messageDiv = document.getElementById("messages");
-            messageDiv.innerHTML += `<p>${data.accuser} made a false accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.innerHTML += `<p>${data.character} (${data.accuser}) made a false accusation: ${data.suspect} in the ${data.room} with the ${data.weapon}.</p>`;
+            messageDiv.innerHTML += `<p>${data.character} (${data.accuser}) is out of the game.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
+        })
+
+        socket.on("out_of_game", function(data) {
+            const messageDiv = document.getElementById("messages");
+            messageDiv.innerHTML += `<p>You are out of the game.</p>`;
+            messageDiv.scrollTop = messageDiv.scrollHeight;
+            chooseMoveButton.disabled = true; // Disable button
+            chooseMoveButton.style.cursor = "not-allowed"; // Change cursor to not-allowed
+            endTurnButton.disabled = true; 
+            endTurnButton.style.cursor = "not-allowed"; 
+            endTurn();
         })
 
         socket.on('valid_locs', function(data) {

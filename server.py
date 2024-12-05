@@ -188,7 +188,10 @@ def make_suggestion(data):
                          broadcast=True)
 
             else:
-                emit("suggestion_error", {"game_id": game_id}, broadcast=True)
+                emit("suggestion_error", {
+                    "game_id": game_id,
+                    "message": res[1]
+                    }, to=player_id)
         else:
             emit("Could not load game", {"game_id": game_id}, broadcast=True)
 
@@ -234,17 +237,34 @@ def make_accusation(data):
         loaded_game = load_from_db(game_id)
         if loaded_game:
             res = loaded_game.make_accusation(player_id, suspect, room_id, weapon)
+            character = loaded_game.state.play_to_char[player_id].name
+            room = loaded_game.state.locations[room_id].location_name
             if res[0]:
                 # split into cases where res[1] is true or false
-                emit("acc_res", {
-                    "game_id": game_id,
-                    "message" : res[2],
-                    "accuser": player_id,
-                    "suspect": suspect,
-                    "room_id": room_id,
-                    "weapon": weapon,
-                    "state": loaded_game.state.to_json()
-                }, broadcast=True)
+                if res[1]:
+                    emit("correct_acc", {
+                        "game_id": game_id,
+                        "message" : res[2],
+                        "accuser": player_id,
+                        "character": character,
+                        "suspect": suspect,
+                        "room": room,
+                        "weapon": weapon,
+                        "state": loaded_game.state.to_json()
+                    }, broadcast=True)
+                else:
+                    emit("false_acc", {
+                        "game_id": game_id,
+                        "accuser": player_id,
+                        "character": character,
+                        "suspect": suspect,
+                        "room": room,
+                        "weapon": weapon,
+                        "state": loaded_game.state.to_json()
+                    }, broadcast=True)
+                    emit("out_of_game", {
+                        "game_id": game_id,
+                    }, to=player_id)
             # else:
             #     emit("false_acc", {
             #         "game_id": game_id,

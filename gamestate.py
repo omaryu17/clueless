@@ -70,8 +70,8 @@ class GameState():
         room = self.locations[room_id]
 
         # need to be in the same room
-        if suggester_char.location != room or room.is_room == False:
-            return (False, "The suggester is not in the same room suggested or the location is not a room")
+        if suggester_char.location != room:
+            return (False, "Suggestion invalid - You are not in the same room as the one you suggested")
         
         suggestion = Suggestion(suggester_name, suspect_name, room.location_name, weapon)
         self.suggestions.append(suggestion)
@@ -195,6 +195,8 @@ class GameState():
         self.moved, self.made_suggestion = False, False
         self.turn_index = (self.turn_index + 1) % self.num_players
         player_id = self.turn_order[self.turn_index]
+        if self.play_to_char[player_id].player.status == "OUT":
+            return self.advance_turn()
         self.play_to_char[player_id].turn = True
         return player_id, f"{self.play_to_char[player_id].name} ({player_id})"
     
@@ -215,13 +217,14 @@ class GameState():
         player = character.player
         location = character.location
 
+        if player.status == "OUT" or self.status == "OVER":
+            return []
         if (not self.moved) and (not self.made_suggestion): 
             # can't move after making suggestion
             moves.append("moveToLocation")
         if (not self.made_suggestion) and (location) and (location.is_room): 
             moves.append("suggestion")
-        if player.status != "OUT":
-            moves.append("accusation")
+        moves.append("accusation")
         return moves
     
     def valid_end_turn(self, player_id):
