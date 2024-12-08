@@ -77,7 +77,6 @@ class GameState():
         self.suggestions.append(suggestion)
         
         # move suspect to room
-        print(self.name_to_char)
         suspect_char = self.name_to_char[suspect_name]
         suspect_char.move_char(room) # need error handling maybe, but should only expect that client sends valid message
         # move weapon if we want
@@ -198,7 +197,7 @@ class GameState():
         if self.play_to_char[player_id].player.status == "OUT":
             return self.advance_turn()
         self.play_to_char[player_id].turn = True
-        return player_id, f"{self.play_to_char[player_id].name} ({player_id})"
+        return player_id, f"{self.play_to_char[player_id].name}"
     
 
     # UNUSED AS OF NOW

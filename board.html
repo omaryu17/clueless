@@ -110,14 +110,60 @@
             margin: 0;
             background-color: #202D1B;
         }
+        .character-marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #C26571;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: white;
+            z-index: 10;
+        }
         .game-board {
             display: grid;
+            position: relative;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
             gap: 10px;
             width: 80vmin;
             height: 80vmin;
         }
+
+        .start-scarlet { top: 0.5%; left: 68%; }
+        .start-mustard { top: 27.5%; right: 0.5%; }
+        .start-white { bottom: 0.5%; left: 68%; }
+        .start-green { bottom: 0.5%; right: 68%; }
+        .start-peacock { top: 68%; left: 0.5%; }
+        .start-plum { top: 27.5%; left: 0.5%; }
+
+        .pos-study { top: 10%; left: 10%; }
+        .pos-hall { top: 10%; left: 45%; }
+        .pos-lounge { top: 10%; right: 10%; }
+        .pos-library { top: 45%; left: 10%; }
+        .pos-billiard-room { top: 45%; left: 45%; }
+        .pos-dining-room { top: 45%; right: 10%; }
+        .pos-conservatory { bottom: 10%; left: 10%; }
+        .pos-ballroom { bottom: 10%; left: 45%; }
+        .pos-kitchen { bottom: 10%; right: 10%; }
+        
+        .pos-studytohall { top: 7%; left: 27.5%; }
+        .pos-halltolounge { top: 7%; right: 27.5%; }
+        .pos-librarytobilliard { top: 47.5%; left: 27.5%; }
+        .pos-billiardtodining { top: 47.5%; right: 27.5%; }
+        .pos-conservatorytoballroom { bottom: 7%; left: 27.5%; }
+        .pos-ballroomtokitchen { bottom: 7%; right: 27.5%; }
+
+        .pos-studytolibrary { top: 27.5%; left: 7%; }
+        .pos-halltobilliard { top: 27.5%; left: 45%; }
+        .pos-loungetodining { top: 27.5%; right: 7%; }
+        .pos-librarytoconservatory { bottom: 27.5%; left: 7%; }
+        .pos-billiardtoballroom { bottom: 27.5%; left: 45%; }
+        .pos-diningtokitchen { bottom: 27.5%; right: 7%; }
+
         .room {
             background-color: #472318;
             display: flex;
@@ -180,5 +226,106 @@
         <div class="hallway-h" id=19>H12</div>
         <div class="room" id=20>Kitchen</div>
     </div>
+
+    <script>
+        const characterColors = {
+            'Miss Scarlet': '#FF2400',
+            'Col. Mustard': '#B8860B',
+            'Mrs. White': '#FFA500',
+            'Mr. Green': '#006400',
+            'Mrs. Peacock': '#4169E1',
+            'Professor Plum': '#8B008B'
+        };
+
+        function calculateMarkerPosition(location, markersInLocation) {
+            const basePositions = {
+                'study': { top: 10, left: 10 },
+                'hall': { top: 10, left: 45 },
+                'lounge': { top: 10, right: 10 },
+                'library': { top: 45, left: 10 },
+                'billiard-room': { top: 45, left: 45 },
+                'dining-room': { top: 45, right: 10 },
+                'conservatory': { bottom: 10, left: 10 },
+                'ballroom': { bottom: 10, left: 45 },
+                'kitchen': { bottom: 10, right: 10 }
+            };
+
+            const offsets = [
+                [],
+                [[0, 0]],
+                [[0, -4], [0, 4]],
+                [[-4, 0], [4, -4], [4, 4]],
+                [[-4, -4], [-4, 4], [4, -4], [4, 4]],
+                [[-4, -4], [-4, 4], [0, 0], [4, -4], [4, 4]],
+                [[-4, -4], [-4, 0], [-4, 4], [4, -4], [4, 0], [4, 4]]
+            ];
+
+            return offsets[Math.min(markersInLocation.length, 6)];
+        }
+
+        const locationMarkers = {};
+
+        function createCharacterMarker(character) {
+            const marker = document.createElement('div');
+            marker.className = 'character-marker';
+            marker.id = `marker-${character.replace(/\s+/g, '-').toLowerCase()}`;
+            marker.style.backgroundColor = characterColors[character];
+            const initials = character.split(' ').map(name => name[0]).join('');
+            marker.textContent = initials;
+            return marker;
+        }
+
+        function placeCharacterMarker(character, location) {
+            const board = document.querySelector('.game-board');
+            let marker = document.getElementById(`marker-${character.replace(/\s+/g, '-').toLowerCase()}`);
+
+            Object.keys(locationMarkers).forEach(loc => {
+                locationMarkers[loc] = locationMarkers[loc].filter(m => m !== character);
+            });
+
+            if (!marker) {
+                marker = createCharacterMarker(character);
+                board.appendChild(marker);
+            }
+
+            marker.className = 'character-marker';
+            marker.style.marginTop = '0';
+            marker.style.marginLeft = '0';
+            
+            if (location === 'start') {
+                marker.classList.add(`start-${character.split(' ')[1].toLowerCase()}`);
+                if (!locationMarkers['start']) locationMarkers['start'] = [];
+                locationMarkers['start'].push(character);
+            } else {
+                const locationKey = location.toLowerCase().replace(/\s+/g, '-');
+                if (!locationMarkers[locationKey]) locationMarkers[locationKey] = [];
+                locationMarkers[locationKey].push(character);
+
+                const markersInLocation = locationMarkers[locationKey];
+                const positions = calculateMarkerPosition(locationKey, markersInLocation);
+                
+                const markerIndex = markersInLocation.indexOf(character);
+                if (markerIndex !== -1 && positions.length > markerIndex) {
+                    const [topOffset, leftOffset] = positions[markerIndex];
+                    
+                    marker.classList.add(`pos-${locationKey}`);
+                    
+                    if (topOffset) marker.style.marginTop = `${topOffset}%`;
+                    if (leftOffset) marker.style.marginLeft = `${leftOffset}%`;
+                }
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (data.type === 'playerMoved') {
+                placeCharacterMarker(data.character, data.location);
+            } else if (data.type === 'gameStart') {
+                data.characters.forEach(char => {
+                    placeCharacterMarker(char, 'start');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

@@ -112,7 +112,8 @@ def create_game(data):
             play_obj = play_to_chars[player].player
             if play_obj.turn:
                 emit("server_broadcast", {
-                    "response": f"It is {play_to_chars[player].name} ({player})'s turn."
+                    #"response": f"It is {play_to_chars[player].name} ({player})'s turn."
+                    "response": f"It is {play_to_chars[player].name}'s turn."
                 }, broadcast=True)
             emit("player_start", {
                 "is_turn": play_obj.turn,
@@ -218,7 +219,8 @@ def disprove_suggestion(data):
                 suggester_id = loaded_game.state.char_to_play[suggestion.suggester].player_id
 
                 emit("disprover_msg", {
-                    "card": f"Your suggestion was disproved by {character} with the card: {card}"
+                    "msg": f"Your suggestion was disproved by {character} with the card: {card}",
+                    "card": card
                 }, to=suggester_id)
             else:
                 emit("disprove_error", {"game_id": game_id}, broadcast=True)

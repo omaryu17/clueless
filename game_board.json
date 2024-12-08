@@ -44,7 +44,7 @@
         {"from": "Conservatory", "to": ["LibraryToConservatory", "ConservatoryToBallroom"], "type": "hallways"},
         {"from": "Conservatory", "to": ["Lounge"], "type": "rooms"},
         {"from": "ConservatoryToBallroom", "to": ["Conservatory", "Ballroom"], "type": "rooms"},
-        {"from": "Ballroom", "to": ["ConservatoryToBallroom", "BallroomToKitchen"], "type": "hallways"},
+        {"from": "Ballroom", "to": ["ConservatoryToBallroom", "BallroomToKitchen", "BilliardToBallroom"], "type": "hallways"},
         {"from": "BallroomToKitchen", "to": ["Ballroom", "Kitchen"], "type": "rooms"},
         {"from": "Kitchen", "to": ["DiningToKitchen", "BallroomToKitchen"], "type": "hallways"},
         {"from": "Kitchen", "to": ["Study"], "type": "rooms"}
