@@ -250,6 +250,16 @@
                 'kitchen': { bottom: 10, right: 10 }
             };
 
+            const rightRoomOffsets = [
+                [],
+                [[0, 0]],
+                [[0, 4], [0, -4]],
+                [[-4, 0], [4, 4], [4, -4]],
+                [[-4, 4], [-4, -4], [4, 4], [4, -4]],
+                [[-4, 4], [-4, -4], [0, 0], [4, 4], [4, -4]],
+                [[-4, 4], [-4, 0], [-4, -4], [4, 4], [4, 0], [4, -4]]
+            ];
+
             const offsets = [
                 [],
                 [[0, 0]],
@@ -260,7 +270,10 @@
                 [[-4, -4], [-4, 0], [-4, 4], [4, -4], [4, 0], [4, 4]]
             ];
 
-            return offsets[Math.min(markersInLocation.length, 6)];
+            const isOnRight = ['lounge', 'dining-room', 'kitchen'].includes(location);
+    
+            return (isOnRight ? rightRoomOffsets : offsets)[Math.min(markersInLocation.length, 6)];
+            //return offsets[Math.min(markersInLocation.length, 6)];
         }
 
         const locationMarkers = {};
@@ -291,6 +304,7 @@
             marker.className = 'character-marker';
             marker.style.marginTop = '0';
             marker.style.marginLeft = '0';
+            marker.style.marginRight = '0';
             
             if (location === 'start') {
                 marker.classList.add(`start-${character.split(' ')[1].toLowerCase()}`);
@@ -311,7 +325,12 @@
                     marker.classList.add(`pos-${locationKey}`);
                     
                     if (topOffset) marker.style.marginTop = `${topOffset}%`;
-                    if (leftOffset) marker.style.marginLeft = `${leftOffset}%`;
+
+                    if (['lounge', 'dining-room', 'kitchen'].includes(locationKey)) {
+                        if (leftOffset) marker.style.marginRight = `${leftOffset}%`;
+                    } else {
+                        if (leftOffset) marker.style.marginLeft = `${leftOffset}%`;
+                    }
                 }
             }
         }
